@@ -1,8 +1,20 @@
 # 依赖
 node_modules/
 
-# 聊天记录 —— 绝对不能进仓库
+# 聊天记录 / 密钥 —— 绝对不能进仓库
 messages.json
+accounts.json
+preset_seats.json
+master_seat.json
+srp_store.json
+pair.code
+pair.code
+tls/
+
+# 备份文件
+*.bak
+*.bak-*
+*.bak.*
 
 # 日志
 *.log
@@ -17,3 +29,8 @@ Thumbs.db
 
 # 打包产物
 *.tar.gz
+
+# 敏感数据（位于仓库上级目录，防误加）
+../accounts.json
+../preset_seats.json
+../master_seat.json

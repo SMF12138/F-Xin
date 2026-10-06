@@ -48,9 +48,17 @@ echo "0 3 * * * cp /opt/chat/messages.json ~/backup-\$(date +\%F).json" | cronta
 | 变量 | 默认 | 说明 |
 |---|---|---|
 | `PORT` | `8080` | 监听端口 |
+| `TOKEN` | 空 | 访问密码；设置后网页和 WebSocket 连接都需要验证，不设则不验证 |
+
+运行示例：
+
+```bash
+TOKEN=*** node server.js
+# 或 pm2 start server.js --name chat --env TOKEN=***
+```
 
 ## 注意
 
 - 消息传输**不加密**，请勿用于传输敏感内容
-- 登录仅凭名字，**无密码校验**
+- 登录凭名字 + TOKEN 密码；Token 只防君子（明文传输），挡不住抓包
 - `messages.json` 已被 `.gitignore` 排除，不会进入仓库

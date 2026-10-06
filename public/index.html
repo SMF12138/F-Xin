@@ -3,39 +3,237 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>聊天</title>
+<title>风信</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
+:root {
+  --bg: #0a0e0a;
+  --panel: #0d130d;
+  --border: #1c2b1c;
+  --green: #00ff9c;
+  --dim: #2a5c3f;
+  --red: #ff2e4d;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
 body {
-  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-  background: #f5f5f5; height: 100vh; display: flex;
-  flex-direction: column; max-width: 700px; margin: 0 auto;
+  font-family: "Courier New", "JetBrains Mono", Consolas, monospace;
+  background: var(--bg);
+  color: var(--green);
+  height: 100vh; display: flex; flex-direction: column;
+  max-width: 860px; margin: 0 auto;
+  overflow: hidden;
+  position: relative;
 }
+/* 动态网格背景：透视网格缓缓流动 */
+body::before {
+  content: ""; position: fixed; inset: -50%; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,255,156,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,156,0.07) 1px, transparent 1px);
+  background-size: 42px 42px;
+  transform: perspective(600px) rotateX(55deg);
+  transform-origin: center top;
+  animation: gridMove 6s linear infinite;
+  opacity: 0.45;
+}
+@keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 42px; } }
+/* 顶部绿色光晕呼吸 + 轻微闪烁，保留 CRT 扫描线 */
+body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 5;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(0,255,156,0.16), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+  animation: flicker 4s infinite;
+}
+@keyframes flicker { 0%,100%{opacity:1;} 47%{opacity:0.93;} 48%{opacity:1;} 92%{opacity:0.96;} 93%{opacity:1;} }
+header, #seatsBar, #msgs, footer { position: relative; z-index: 2; }
 header {
-  background: #4a4a4a; color: #fff; padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: none;
+  padding: 10px 16px;
   display: flex; justify-content: space-between; align-items: center;
+  text-shadow: 0 0 8px rgba(0,255,156,0.5);
 }
-#status { font-size: 12px; opacity: 0.8; }
-#msgs { flex: 1; overflow-y: auto; padding: 16px; }
+header b {
+  font-weight: bold; letter-spacing: 2px; font-size: 15px;
+  color: var(--green); text-shadow: 0 0 10px rgba(0,255,156,0.7);
+}
+header b::before { content: "◈ "; opacity: 0.8; }
+#status {
+  font-size: 12px; opacity: 0.85;
+  animation: blink 1s steps(1) infinite;
+  color: var(--green);
+}
+@keyframes blink { 50% { opacity: 0.25; } }
+#msgs {
+  flex: 1; overflow-y: auto; padding: 16px;
+  border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  scrollbar-width: thin; scrollbar-color: var(--dim) transparent;
+}
+#msgs::-webkit-scrollbar { width: 6px; }
+#msgs::-webkit-scrollbar-thumb { background: var(--dim); }
 .msg { margin-bottom: 14px; display: flex; }
 .msg.me { flex-direction: row-reverse; }
+.msg .sender-meta { font-size: 10px; color: var(--dim); margin-bottom: 3px; letter-spacing: 1px; }
+.msg:not(.me) .sender-meta::before { content: "[usr] "; }
+.msg.me .sender-meta::before { content: "[me]  "; }
 .bubble {
-  max-width: 75%; padding: 9px 13px; border-radius: 10px;
-  font-size: 15px; line-height: 1.5; word-break: break-word;
+  max-width: 75%;
+  padding: 10px 14px;
+  border: 1px solid var(--dim);
+  border-radius: 8px;
+  font-size: 14px; line-height: 1.6; word-break: break-word;
+  background: rgba(0,255,156,0.04);
+  box-shadow: 0 0 8px rgba(0,255,156,0.12) inset;
+  transition: box-shadow 0.25s, transform 0.25s;
 }
-.msg:not(.me) .bubble { background: #fff; }
-.msg.me .bubble { background: #95ec69; }
-.time { font-size: 11px; color: #999; text-align: center; margin: 12px 0; }
-footer { display: flex; padding: 10px; background: #fff; border-top: 1px solid #ddd; }
-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; outline: none; }
-button { padding: 0 20px; margin-left: 8px; border: none; border-radius: 6px; background: #07c160; color: #fff; font-size: 15px; cursor: pointer; }
+.msg { animation: msgIn 0.35s cubic-bezier(0.22,1,0.36,1); }
+@keyframes msgIn { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
+.msg:not(.me) .bubble { border-color: var(--dim); color: var(--green); }
+.msg.me .bubble {
+  border-color: var(--green); color: #d6fff0;
+  background: linear-gradient(135deg, rgba(0,255,156,0.14), rgba(0,255,156,0.05));
+  box-shadow: 0 0 14px rgba(0,255,156,0.28), 0 0 8px rgba(0,255,156,0.15) inset;
+}
+.msg.me .bubble::after { content: " ▮"; animation: blink 1s steps(1) infinite; color: var(--green); }
+.time { font-size: 10px; color: var(--dim); letter-spacing: 1px; margin: 12px 0; text-align: center; }
+footer {
+  display: flex; padding: 10px; gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border); border-bottom: none;
+}
+input {
+  flex: 1; padding: 10px 12px;
+  border: 1px solid var(--dim); border-radius: 3px;
+  background: #050805; color: var(--green);
+  font-family: inherit; font-size: 14px; outline: none;
+  caret-color: var(--green);
+}
+input::placeholder { color: var(--dim); }
+input:focus { border-color: var(--green); box-shadow: 0 0 8px rgba(0,255,156,0.25); }
+button {
+  padding: 0 22px; border: 1px solid var(--green); border-radius: 3px;
+  background: transparent; color: var(--green);
+  font-family: inherit; font-size: 14px; font-weight: bold; letter-spacing: 1px;
+  cursor: pointer; text-transform: uppercase;
+  transition: all 0.15s;
+}
+button:hover { background: var(--green); color: #04180d; box-shadow: 0 0 14px rgba(0,255,156,0.5); }
+
+/* ── 十剑占位条 ── */
+#seatsBar {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  justify-content: center;
+}
+.seat-chip {
+  font-size: 11px; letter-spacing: 1px;
+  padding: 3px 8px; border-radius: 3px;
+  border: 1px solid var(--dim);
+  color: var(--dim); opacity: 0.5;
+  white-space: nowrap;
+}
+.seat-chip.occupied {
+  color: var(--green); opacity: 1;
+  border-color: var(--green);
+  background: rgba(0,255,156,0.14);
+  box-shadow: 0 0 10px rgba(0,255,156,0.45);
+  animation: seatBlink 1.2s ease-in-out infinite;
+}
+@keyframes seatBlink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(0,255,156,0.45); transform: scale(1); }
+  50% { opacity: 0.55; box-shadow: 0 0 3px rgba(0,255,156,0.15); transform: scale(0.97); }
+}
+
+/* ── 退出按钮 ── */
+.logout-btn {
+  margin-left: 12px; padding: 3px 10px;
+  border: 1px solid var(--red); border-radius: 3px;
+  background: transparent; color: var(--red);
+  font-family: inherit; font-size: 11px; font-weight: bold; letter-spacing: 1px;
+  cursor: pointer;
+}
+.logout-btn:hover { background: var(--red); color: #1a0408; box-shadow: 0 0 10px rgba(255,46,77,0.5); }
+
+/* ── 登录窗 ── */
+#loginOverlay {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(10,14,10,0.94);
+  display: flex; align-items: center; justify-content: center;
+}
+#loginOverlay.hidden { display: none; }
+.login-box {
+  width: 300px; max-width: 90vw;
+  background: #0d130d;
+  border: 1px solid #2a5c3f; border-radius: 8px;
+  padding: 28px 26px 24px;
+  box-shadow: 0 0 40px rgba(0,255,156,0.18), 0 0 80px rgba(0,255,156,0.06), inset 0 0 20px rgba(0,255,156,0.05);
+  animation: boxIn 0.5s cubic-bezier(0.22,1,0.36,1);
+  position: relative;
+  overflow: hidden;
+}
+/* 登录框顶部扫描线光带 */
+.login-box::before {
+  content: ""; position: absolute; top: -1px; left: 20%; right: 20%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  animation: scanLine 3s ease-in-out infinite;
+}
+@keyframes scanLine { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+@keyframes boxIn { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
+.login-title {
+  font-size: 20px; font-weight: bold; letter-spacing: 4px;
+  color: #00ff9c; text-align: center;
+  margin-bottom: 22px;
+  text-shadow: 0 0 12px rgba(0,255,156,0.7), 0 0 30px rgba(0,255,156,0.35);
+}
+.login-input {
+  width: 100%; padding: 11px 12px; margin-bottom: 10px;
+  background: #050805; border: 1px solid #1c2b1c; border-radius: 6px;
+  color: #00ff9c; font-family: inherit; font-size: 15px; outline: none;
+  caret-color: #00ff9c;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.login-input:focus { border-color: #00ff9c; box-shadow: 0 0 12px rgba(0,255,156,0.35); }
+.login-input::placeholder { color: #3a6b4d; }
+.login-err { min-height: 18px; font-size: 12px; color: #ff5c72; text-align: center; margin-bottom: 2px; }
+.login-btn {
+  width: 100%; padding: 11px; margin-top: 4px;
+  border: none; border-radius: 6px;
+  background: linear-gradient(135deg, #00ff9c, #00c97a); color: #04180d;
+  font-family: inherit; font-size: 15px; font-weight: bold; letter-spacing: 4px;
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(0,255,156,0.4);
+  transition: all 0.18s;
+}
+.login-btn:hover { box-shadow: 0 0 28px rgba(0,255,156,0.7); transform: translateY(-1px); }
+.login-btn:active { transform: scale(0.98); }
+.login-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
 </style>
 </head>
 <body>
+<!-- 复古终端登录窗 -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <div class="login-title">天地一家奶龙盟</div>
+    <input id="loginName" class="login-input" placeholder="名字" autocomplete="off">
+    <input id="loginPass" class="login-input" type="password" placeholder="口令" autocomplete="off">
+    <div class="login-err" id="loginErr"></div>
+    <button id="loginBtn" class="login-btn">进入</button>
+  </div>
+</div>
+
 <header>
-  <b>聊天</b>
+  <b>天地一家奶龙盟</b>
   <span id="status">连接中...</span>
+  <button id="logoutBtn" class="logout-btn" style="display:none" onclick="logout()">EXIT</button>
 </header>
+
+<div id="seatsBar"></div>
 
 <div id="msgs"></div>
 
@@ -45,80 +243,425 @@ button { padding: 0 20px; margin-left: 8px; border: none; border-radius: 6px; ba
 </footer>
 
 <script>
-let ws, myName = localStorage.getItem('name');
+// ====== 大数与 SRP 工具（BigInt 实现，与浏览器原生兼容） ======
+const hexToBytes = (h) => { h = h.length % 2 ? '0' + h : h; const u = new Uint8Array(h.length / 2); for (let i = 0; i < u.length; i++) u[i] = parseInt(h.substr(i * 2, 2), 16); return u; };
+const bytesToHex = (b) => Array.from(b).map(x => x.toString(16).padStart(2, '0')).join('');
+const b64enc = (b) => btoa(String.fromCharCode(...b));
+const b64dec = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 
-if (!myName) {
-  myName = prompt('请输入你的名字:');
-  if (!myName) myName = '匿名';
-  localStorage.setItem('name', myName);
+let N, G, NB;
+async function loadParams() {
+  const r = await fetch('/srp-params.json');
+  const p = await r.json();
+  N = BigInt('0x' + p.N); G = BigInt('0x' + p.g);
+  NB = p.N.length / 2;
+}
+
+function modPow(base, exp, mod) {
+  base = ((base % mod) + mod) % mod;
+  let r = 1n, b = base, e = exp;
+  while (e > 0n) { if (e & 1n) r = r * b % mod; b = b * b % mod; e >>= 1n; }
+  return r;
+}
+const toBuf = (bn) => { let h = bn.toString(16); if (h.length % 2) h = '0' + h; h = h.padStart(NB * 2, '0'); return hexToBytes(h); };
+const toBn = (buf) => BigInt('0x' + bytesToHex(buf));
+
+async function sha256(...parts) {
+  let buf;
+  if (parts.length === 1) buf = parts[0];
+  else { let len = 0; parts.forEach(p => len += p.length); buf = new Uint8Array(len); let o = 0; parts.forEach(p => { buf.set(p, o); o += p.length; }); }
+  return new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
+}
+
+function randScalar() {
+  for (;;) {
+    const c = toBn(crypto.getRandomValues(new Uint8Array(NB)));
+    if (c > 0n && c < N - 1n) return c;
+  }
+}
+
+// HKDF-SHA256（Web Crypto）
+async function hkdf(ikm, saltStr, infoStr) {
+  const base = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt: new TextEncoder().encode(saltStr), info: new TextEncoder().encode(infoStr) },
+    base, 256);
+  return new Uint8Array(bits);
+}
+
+async function computeX(saltBytes, identity, password) {
+  const inner = await sha256(new TextEncoder().encode(String(identity) + ':' + password));
+  return toBn(await sha256(saltBytes, inner));
+}
+
+const MASTER_PASSPHRASE = '十里坡剑神';
+// 10 座预置 salt（公开安全，不含口令），与服务端 preset_seats.json 对应
+const SEAT_SALTS = [
+  '3f18972f5055c93ca2bc7dd04d6881464bcfab7202a993f80ca2a2084034910a',
+  'e132f4a5d599b36831b1a0c0c6e7392d699ce445ce125ecb1addad182ebddfa4',
+  '260a9f743955198167081deeba70562631ea65646d0e1e08f612c6c4e63dbe27',
+  'e81ea2a0f920524a964be86fccebb91dd58eb41fcff842de7da4741a3f7d8d2c',
+  '855ab13abf4b2e1bf269c850579441d5f38b3e29e77c0d664f3642e362434442',
+  '0a67795f6653ce48ce543dfa89699584f6b79a982793159e0ea0e335fe382280',
+  'de0baf4ebf30257fca2891b4f1a509e5c334382343884df2d664ecd208cc3f78',
+  '6291e2bc0cf92c1f27af7303c3e1e634e8cc8de079b594e6536c11cbbbd2f77e',
+  'a57947efa6ba69d29fa2755ad4291af6d998b67e58d52c328afe9c6590c07bb1',
+  'e6c868c58dbf41dc3a60b775fe68df3e83d29a7486c0b1eab6d475eb44a5a4bb',
+];
+
+// 逐座尝试：对每座用它预置的 salt + 固定身份 seatN + 口令派生，直到某座匹配
+function trySeat(seatNum, password, userName) {
+  return new Promise((resolve, reject) => {
+    const normName = userName || '';
+    const a = randScalar();
+    const A = modPow(G, a, N);
+    const identity = 'seat' + seatNum;   // 固定身份，与服务端预置一致
+    const realSalt = hexToBytes(SEAT_SALTS[seatNum - 1]);
+
+    const ch = new WebSocket(wsUrl());
+    const timeout = setTimeout(() => { ch.close(); reject(new Error('timeout')); }, 20000);
+    ch.onopen = () => ch.send(JSON.stringify({
+      type: 'srp_hello', name: normName, seat: seatNum, A: bytesToHex(toBuf(A))
+    }));
+    ch.onerror = () => { clearTimeout(timeout); reject(new Error('conn')); };
+    ch.onmessage = async (e) => {
+      const m = JSON.parse(e.data);
+      if (m.type === 'srp_challenge') {
+        try {
+          const B = toBn(hexToBytes(m.B));
+          if (B % N === 0n) throw new Error('badB');
+          const xr = await computeX(hexToBytes(m.salt), identity, password);
+          const kMult = toBn(await sha256(toBuf(N), toBuf(G)));
+          const u = toBn(await sha256(toBuf(A), toBuf(B)));
+          if (u === 0n) throw new Error('u0');
+          const base = ((B - kMult * modPow(G, xr, N)) % N + N) % N;
+          const S = modPow(base, a + u * xr, N);
+          const Kbuf = toBuf(S);
+          const keyBytes = await hkdf(Kbuf, 'chat2-srp-salt', 'chat2-session-key-v1');
+          const M1 = await sha256(toBuf(A), toBuf(B), Kbuf);
+          ch.send(JSON.stringify({ type: 'srp_verify', M1: bytesToHex(M1) }));
+          const M2exp = await sha256(toBuf(A), M1, Kbuf);
+          ch.onmessage = async (e2) => {
+            const m2 = JSON.parse(e2.data);
+            clearTimeout(timeout);
+            if (m2.type === 'srp_ready' && m2.M2 === bytesToHex(M2exp)) {
+              const key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['encrypt', 'decrypt']);
+              // 保留连接 ch（不关闭），登录后继续使用
+              resolve({ ok: true, key, seatNum, ch });
+            } else if (m2.type === 'auth_result' && m2.ok === false) {
+              ch.close();
+              reject(new Error(m2.error === 'seat_taken' ? 'seat_taken' : 'bad_password'));
+            }
+          };
+        } catch (err) { clearTimeout(timeout); ch.close(); reject(err); }
+      } else if (m.type === 'auth_result' && m.ok === false) {
+        clearTimeout(timeout); ch.close();
+        reject(new Error(m.error === 'seat_taken' ? 'seat_taken' : (m.error === 'no_name' ? 'no_name' : 'bad_password')));
+      }
+    };
+  });
+}
+
+// 万能口令登录：固定身份 'master'，服务端用内置万能验证子校验；不占座、任意名字
+function masterLogin(password) {
+  return new Promise((resolve, reject) => {
+    const a = randScalar();
+    const A = modPow(G, a, N);
+    const identity = 'master';
+    const ch = new WebSocket(wsUrl());
+    const timeout = setTimeout(() => { ch.close(); reject(new Error('timeout')); }, 20000);
+    ch.onopen = () => ch.send(JSON.stringify({
+      type: 'srp_hello', name: '', identity: 'master', A: bytesToHex(toBuf(A))
+    }));
+    ch.onerror = () => { clearTimeout(timeout); reject(new Error('conn')); };
+    ch.onmessage = async (e) => {
+      const m = JSON.parse(e.data);
+      if (m.type === 'srp_challenge') {
+        try {
+          const xr = await computeX(hexToBytes(m.salt), identity, password);
+          const B = toBn(hexToBytes(m.B));
+          if (B % N === 0n) throw new Error('badB');
+          const kMult = toBn(await sha256(toBuf(N), toBuf(G)));
+          const u = toBn(await sha256(toBuf(A), toBuf(B)));
+          if (u === 0n) throw new Error('u0');
+          const base = ((B - kMult * modPow(G, xr, N)) % N + N) % N;
+          const S = modPow(base, a + u * xr, N);
+          const Kbuf = toBuf(S);
+          const keyBytes = await hkdf(Kbuf, 'chat2-srp-salt', 'chat2-session-key-v1');
+          const M1 = await sha256(toBuf(A), toBuf(B), Kbuf);
+          ch.send(JSON.stringify({ type: 'srp_verify', M1: bytesToHex(M1) }));
+          const M2exp = await sha256(toBuf(A), M1, Kbuf);
+          ch.onmessage = async (e2) => {
+            const m2 = JSON.parse(e2.data);
+            clearTimeout(timeout);
+            if (m2.type === 'srp_ready' && m2.M2 === bytesToHex(M2exp)) {
+              const key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['encrypt', 'decrypt']);
+              resolve({ ch, key, isMaster: true });   // 保留 ch
+            } else { ch.close(); reject(new Error('M2 mismatch')); }
+          };
+        } catch (err) { clearTimeout(timeout); ch.close(); reject(err); }
+      } else if (m.type === 'auth_result' && m.ok === false) {
+        clearTimeout(timeout); ch.close(); reject(new Error(m.error || 'bad_password'));
+      }
+    };
+  });
+}
+
+async function srpClient(name, password) {
+  const normName = String(name || '').trim().slice(0, 20);
+  if (!normName) throw new Error('no_name');
+  // 万能口令：固定 master 服务器（保留原有逻辑）
+  if (password === MASTER_PASSPHRASE) {
+    return masterLogin(password);
+  }
+  // 普通口令：逐座尝试 1-10，直到某座匹配（口令正确）。全部不匹配=>口令错误
+  const errors = [];
+  for (let seat = 1; seat <= 10; seat++) {
+    try {
+      const r = await trySeat(seat, password, normName);
+      // 该座匹配成功：绑定名字（首登占座）或验证通过，返回保留的连接
+      return { ch: r.ch, key: r.key, seatNum: seat };
+    } catch (e) {
+      errors.push(e.message);
+      if (e.message === 'seat_taken') { /* 该座已被别人占，跳过继续试下一座 */ }
+      else if (e.message === 'no_name') throw e;
+      else { /* bad_password，继续下一座 */ }
+    }
+  }
+  throw new Error('bad_password');
+}
+
+// ====== 消息密钥：全站固定种子派生（所有登录者共享同一把密钥，历史互通） ======
+// 固定种子写死在代码里，服务器不存；不随口令/名字变化，任何口令登录都能解历史。
+const MSG_SALT = new TextEncoder().encode('chat2-msgkey-v2-fixed');
+const MSG_SEED = 'fx7q2m9k4p8d1w5t';   // 全站共享消息密钥种子
+async function deriveMsgKey() {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(MSG_SEED), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: MSG_SALT, iterations: 600000, hash: 'SHA-256' },
+    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+
+
+// ====== 消息加解密（AES-GCM，IV 每次随机，拼在密文前） ======
+async function encMsg(key, text) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(text)));
+  const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12);
+  return b64enc(out);
+}
+async function decMsg(key, b64) {
+  try {
+    const raw = b64dec(b64);
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: raw.subarray(0, 12) }, key, raw.subarray(12));
+    return new TextDecoder().decode(pt);
+  } catch { return '[无法解密]'; }
+}
+
+// ====== 十剑占位条（未登录显示【第N龙】暗，登录后替换为昵称并闪烁） ======
+const SEAT_NAMES = ['第一龙','第二龙','第三龙','第四龙','第五龙','第六龙','第七龙','第八龙','第九龙','第十龙'];
+// 昵称与座号融合：取昵称首字 + 龙的序号汉字（如 第九龙 + "爸爸" → "爸九龙"）
+const CN_NUM = ['一','二','三','四','五','六','七','八','九','十'];
+function fusionLabel(name, seat) {
+  const first = (name || '').slice(0, 1);
+  const idx = (seat >= 1 && seat <= 10) ? CN_NUM[seat - 1] : '';
+  return first + idx + '龙';
+}
+const seatsBarEl = document.getElementById('seatsBar');
+let seatState = {};   // { seatNum: name }
+let mySeatNum = null;
+
+function renderSeats() {
+  let html = '';
+  for (let i = 1; i <= 10; i++) {
+    const who = seatState[i];
+    const label = who ? fusionLabel(who, i) : SEAT_NAMES[i-1];
+    html += '<span class="seat-chip' + (who ? ' occupied' : '') + '">' + escapeHtml(label) + '</span>';
+  }
+  seatsBarEl.innerHTML = html;
+}
+
+// ====== 应用逻辑 ======
+// 焚毁基线：名字 -> 最近一次退出（含刷新/断线）的时刻。登录/渲染消息时取最高水位线，
+// 保证“退出即焚”在刷新场景同样生效。
+const BURN_KEY = 'chat2_burn_baseline';
+function getBurnMap() { try { return JSON.parse(localStorage.getItem(BURN_KEY)) || {}; } catch { return {}; } }
+function recordBurnBaseline(name) {
+  const m = getBurnMap(); m[name] = Date.now();
+  try { localStorage.setItem(BURN_KEY, JSON.stringify(m)); } catch (e) {}
+}
+function getSince(name) { return Number(getBurnMap()[name]) || 0; }
+let ws, sessionKey = null, myName = null, isMaster = false;
+let lastRenderMax = 0;   // 本地已渲染过的最大消息时间戳（防止刷新后已读数漏回）
+// 身份只由本次登录决定：不持久化名字，退出即清零
+const nameInput = document.getElementById('loginName');
+const passInput = document.getElementById('loginPass');
+const loginBtn = document.getElementById('loginBtn');
+const loginErr = document.getElementById('loginErr');
+const loginOverlay = document.getElementById('loginOverlay');
+function hideLogin() { loginOverlay.classList.add('hidden'); }
+function showLoginErr(t) { loginErr.textContent = t; loginErr.style.animation='none'; loginErr.offsetHeight; loginErr.style.animation='blink 0.5s steps(1) 3'; }
+
+function wsUrl() {
+  const proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+  return proto + location.host;
 }
 
 const msgsEl = document.getElementById('msgs');
 const statusEl = document.getElementById('status');
 const inputEl = document.getElementById('input');
 
-function connect() {
-  ws = new WebSocket('ws://' + location.host);
+async function doLogin() {
+  const name = (nameInput.value || '').trim();
+  const pw = passInput.value || '';
+  if (!name) { showLoginErr('请输入名字'); return; }
+  if (!pw) { showLoginErr('请输入口令'); return; }
+  myName = name.slice(0, 20);
+  loginBtn.disabled = true;
+  loginBtn.textContent = '登录中...';
+  statusEl.textContent = '正在登录...';
+  try {
+    const r = await srpClient(name, pw);
+    ws = r.ch;
+    isMaster = !!r.isMaster;
+    mySeatNum = r.seatNum || null;
+    renderSeats();
+    statusEl.textContent = '正在生成密钥...';
+    sessionKey = await deriveMsgKey();
+    hideLogin();
+    // 身份与口令纯内存，不做任何持久化；断线/刷新即需重新登录
+    try { sessionStorage.removeItem('pw_cache'); } catch (e) {}
+    try { localStorage.removeItem('name'); } catch (e) {}
+    onConnected();
+  } catch (err) {
+    loginBtn.disabled = false;
+    loginBtn.textContent = '进入';
+    passInput.value = '';
+    const msg = err.message;
+    const friendly = msg === 'bad_password' ? '口令错误'
+      : msg === 'seat_taken' ? '该座已被占用'
+      : msg === 'no_name' ? '请输入名字'
+      : msg === 'bad_seat' ? '座位号无效'
+      : msg === 'no_preset' ? '该座未配置'
+      : msg === 'timeout' ? '连接超时'
+      : msg === 'conn' ? '连接失败'
+      : (msg || '登录失败');
+    showLoginErr(friendly);
+    statusEl.textContent = friendly;
+  }
+}
 
-  ws.onopen = () => {
-    statusEl.textContent = '已连接';
-    ws.send(JSON.stringify({ type: 'login', name: myName }));
-  };
 
+function logout() {
+  // 清除身份，下次登录全新干净身份（口令本就只在内存，未持久化）
+  try { sessionStorage.removeItem('pw_cache'); } catch (e) {}
+  try { localStorage.removeItem('name'); } catch (e) {}
+  if (!isMaster && myName) { recordBurnBaseline(myName); }
+  sessionKey = null;
+  myName = null;
+  isMaster = false;
+  mySeatNum = null;
+  seatState = {};
+  renderSeats();
+  try { if (ws && ws.readyState === 1) ws.close(); } catch (e) {}
+  // 清空消息区（相当于执行了一遍清除聊天记录）
+  msgsEl.innerHTML = '';
+  // 清空输入框并回到登录窗
+  nameInput.value = '';
+  passInput.value = '';
+  loginErr.textContent = '';
+  document.getElementById('logoutBtn').style.display = 'none';
+  loginOverlay.classList.remove('hidden');
+  passInput.focus();
+}
+
+function onConnected() {
+  statusEl.textContent = '已连接';
+  // 阅后即焚：普通座登录即清空本地消息区，只加载上次退出之后的新消息；master 不清、拉全量
+  msgsEl.innerHTML = '';
+  let since = 0;
+  if (!isMaster) {
+    since = Math.max(getSince(myName), lastRenderMax);
+  }
+  ws.send(JSON.stringify({ type: 'login', name: myName, since }));
+
+  ws.onerror = () => { statusEl.textContent = '连接出错'; };
   ws.onclose = () => {
-    statusEl.textContent = '断开，重连中...';
-    setTimeout(connect, 2000);   // 断线自动重连
+    statusEl.textContent = '连接已断开';
+    sessionKey = null;
+    // 刷新/断线也算退出：记录焚毁基线，下次登录只拉这之后的新消息（退出即清）
+    if (!isMaster && myName) {
+      recordBurnBaseline(myName);
+    }
+    document.getElementById('logoutBtn').style.display = 'none';
+    loginOverlay.classList.remove('hidden');
+    passInput.value = '';
+    passInput.focus();
   };
 
-  ws.onmessage = (e) => {
+  ws.onmessage = async (e) => {
     const m = JSON.parse(e.data);
-
     if (m.type === 'history') {
-      m.messages.forEach(r => addMsg(r.from, r.text, r.time, false));
-    }
-
-    else if (m.type === 'msg') {
-      addMsg(m.from, m.text, m.time, true);
-    }
-
-    else if (m.type === 'online') {
-      statusEl.textContent = m.name + ' 在线';
-    }
-
-    else if (m.type === 'offline') {
-      statusEl.textContent = m.name + ' 离线';
+      for (const r of (m.messages || [])) {
+        const text = m.encrypted ? await decMsg(sessionKey, r.etext) : r.text;
+        addMsg(r.from, text, r.time, false);
+        if (r.time > lastRenderMax) lastRenderMax = r.time;
+      }
+      scrollBottom();
+    } else if (m.type === 'msg') {
+      const text = await decMsg(sessionKey, m.text);
+      if (m.time > lastRenderMax) lastRenderMax = m.time;
+      addMsg(m.from, text, m.time, true);
+    } else if (m.type === 'online') { statusEl.textContent = m.name + ' 在线'; }
+    else if (m.type === 'offline') { statusEl.textContent = m.name + ' 离线'; }
+    else if (m.type === 'seats') { seatState = m.seats || {}; renderSeats(); }
+    else if (m.type === 'seat_update') {
+      if (m.seat) { if (m.name) seatState[m.seat] = m.name; else delete seatState[m.seat]; }
+      renderSeats();
     }
   };
 }
+
+let lastScroll = 0;
+function scrollBottom() { msgsEl.scrollTop = msgsEl.scrollHeight; }
 
 function addMsg(from, text, time, scroll) {
   const mine = from === myName;
   const d = new Date(time);
-  const hhmm = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-
+  const hhmm = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   const el = document.createElement('div');
   el.className = 'msg' + (mine ? ' me' : '');
-  el.innerHTML = `<div><div class="bubble"></div><div style="font-size:11px;color:#999;margin-top:3px">${from} ${hhmm}</div></div>`;
+  el.innerHTML = '<div><div class="sender-meta">' + escapeHtml(from) + ' :: ' + hhmm + '</div><div class="bubble"></div></div>';
   el.querySelector('.bubble').textContent = text;
-
   msgsEl.appendChild(el);
-  if (scroll) msgsEl.scrollTop = msgsEl.scrollHeight;
+  if (scroll && msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 120) scrollBottom();
 }
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-function send() {
+async function send() {
   const text = inputEl.value.trim();
   if (!text) return;
-  if (ws.readyState === 1) {
-    ws.send(JSON.stringify({ type: 'msg', text }));
+  if (!sessionKey) { statusEl.textContent = '未登录'; return; }
+  if (!ws || ws.readyState !== 1) { statusEl.textContent = '连接已断开，请重新登录'; return; }
+  try {
+    const ct = await encMsg(sessionKey, text);
+    ws.send(JSON.stringify({ type: 'msg', text: ct }));
     inputEl.value = '';
+  } catch (e) {
+    statusEl.textContent = '发送失败:' + e.message;
   }
 }
 
-inputEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter') send();
-});
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
 
-connect();
+loadParams().catch(() => { });
+
+// 登录按钮绑定（放在所有函数定义之后，确保一定执行）
+loginBtn.addEventListener('click', doLogin);
+[nameInput, passInput].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
+nameInput.value = '';   // 身份不记忆
+passInput.focus();
+renderSeats();   // 初始渲染十剑占位
 </script>
 </body>
 </html>
