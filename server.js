@@ -78,7 +78,7 @@ let db = loadDB();
 function httpHandler(req, res) {
   if (req.url === '/' || req.url === '/index.html') {
     const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'));
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
     res.end(html);
   } else if (req.url === '/favicon.svg' || req.url === '/favicon.ico') {
     const f = path.join(__dirname, 'public', 'favicon.svg');
