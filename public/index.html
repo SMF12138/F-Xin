@@ -119,8 +119,10 @@ body {
 @keyframes twinkle { 0%,100%{ filter:brightness(1);} 50%{ filter:brightness(1.7);} }
 
 header, #seatsBar, #msgs, footer { position: relative; z-index: 2; }
-body.locked header, body.locked #seatsBar, body.locked footer { opacity: 0.3; transition: opacity 0.6s; }
+body.locked header { opacity: 0.22; transition: opacity 0.6s; }
+body.locked #seatsBar { opacity: 0.5; transition: opacity 0.6s; }
 body.locked #seatsBar { opacity: 0.45; }
+body.locked footer { opacity: 0; pointer-events: none; transition: opacity 0.6s; }
 
 /* ── 顶栏 ── */
 header {
@@ -290,15 +292,15 @@ footer {
 #input:focus { border-color: rgba(176,54,44,0.6); box-shadow: 0 0 0 3px rgba(176,54,44,0.07), 0 0 16px rgba(176,54,44,0.1); }
 .send-btn {
   height: 46px; padding: 0 22px;
-  border: 1px solid rgba(166,52,42,0.5); border-left: none; border-radius: 0 4px 4px 0;
-  background: radial-gradient(120% 160% at 50% 42%, rgba(166,52,42,0.3), rgba(126,42,35,0.14) 70%, rgba(100,34,28,0.1));
-  color: #e0ac9d;
+  border: none; border-left: none; border-radius: 0 4px 4px 0;
+  background: radial-gradient(130% 170% at 50% 40%, #a8412f, #8c3427 75%, #792d22);
+  color: #f4e8d8;
   font-family: var(--serif);
   font-size: 14px; font-weight: 700; letter-spacing: 4px; text-indent: 2px;
   cursor: pointer; position: relative; overflow: hidden;
   transition: all 0.2s;
 }
-.send-btn:hover { background: rgba(176,54,44,0.85); color: #f7ece4; box-shadow: 0 0 20px rgba(176,54,44,0.35); }
+.send-btn:hover { background: radial-gradient(130% 170% at 50% 40%, #b94b38, #9a3c2d 75%, #863225); color: #fdf6ea; box-shadow: 0 4px 18px rgba(150,52,34,0.4); }
 .send-btn:active { transform: scale(0.97); }
 .send-btn::after {
   content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
@@ -344,7 +346,7 @@ footer {
 
 /* ── 朱砂印章徽记 ── */
 .sigil-seal {
-  position: relative; width: 108px; height: 108px; margin-bottom: 30px;
+  position: relative; width: 98px; height: 98px; margin-bottom: 18px;
   animation: stampIn 0.7s cubic-bezier(0.34,1.4,0.64,1) 0.15s both;
 }
 @keyframes stampIn {
@@ -357,15 +359,15 @@ footer {
   background: rgba(158,44,33,0.92);
   border: none; border-radius: 8px;
   filter: url(#sealRough);
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='e'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 2.6 -0.32'/%3E%3C/filter%3E%3Crect width='80' height='80' filter='url(%23e)'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='e'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='1' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.6 -0.15'/%3E%3C/filter%3E%3Crect width='80' height='80' filter='url(%23e)'/%3E%3C/svg%3E");
   -webkit-mask-size: 80px 80px;
 }
 .sigil-seal .glyph {
   position: absolute; inset: 0; display: grid; place-items: center;
   font-family: var(--serif); font-size: 50px; font-weight: 900;
-  color: rgba(240,233,216,0.96);
+  color: rgba(244,238,224,0.92);
   filter: url(#sealRough);
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 0.12'/%3E%3C/filter%3E%3Crect width='90' height='90' filter='url(%23g)'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.22' numOctaves='1' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0.75'/%3E%3C/filter%3E%3Crect width='90' height='90' filter='url(%23g)'/%3E%3C/svg%3E");
   -webkit-mask-size: 90px 90px; mask-size: 90px 90px;
   animation: glyphBreath 5s ease-in-out infinite;
 }
@@ -374,7 +376,7 @@ footer {
 /* ── 标题与副诗 ── */
 .login-title {
   font-family: var(--serif);
-  font-size: 27px; font-weight: 700; letter-spacing: 4px; padding-left: 4px;
+  font-size: 27px; font-weight: 700; letter-spacing: 9px; padding-left: 9px;
   background: linear-gradient(180deg, #f2eee2 20%, #c3bfb0 85%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
@@ -413,7 +415,7 @@ footer {
   width: clamp(280px, 86vw, 420px);
   background-clip: padding-box;
   background:
-    repeating-linear-gradient(0deg, transparent 0 45px, rgba(120,90,50,0.06) 45px 46px),
+    repeating-linear-gradient(0deg, transparent 0 45px, rgba(120,90,50,0.08) 45px 46px),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 0 0.3 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23s)'/%3E%3C/svg%3E"),
     linear-gradient(172deg, rgba(238,231,213,0.97), rgba(223,214,192,0.98));
   border: 1px solid rgba(150,120,70,0.45); border-radius: 4px;
@@ -429,8 +431,8 @@ footer {
   border-radius: 4px 4px 0 0;
 }
 .login-card::after {
-  content: ""; position: absolute; top: 14px; bottom: 14px; left: 14px; right: 14px; pointer-events: none;
-  border-left: 1px solid rgba(163,58,44,0.28); border-right: 1px solid rgba(163,58,44,0.28);
+  content: ""; position: absolute; top: 18px; bottom: 18px; left: 18px; right: 18px; pointer-events: none;
+  border-left: 1px solid rgba(163,58,44,0.4); border-right: 1px solid rgba(163,58,44,0.4);
   border-radius: 2px;
 }
 .corner { position: absolute; width: 22px; height: 22px; pointer-events: none; opacity: 1; }
@@ -442,7 +444,7 @@ footer {
 @keyframes stageIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes cardIn { from { opacity: 0; transform: translateY(22px) scale(0.96); } to { opacity: 1; transform: none; } }
 
-.field { position: relative; margin-bottom: 34px; }
+.field { position: relative; margin-bottom: 26px; }
 .field:last-of-type { margin-bottom: 0; }
 .field .icon {
   position: absolute; left: 2px; top: 50%; transform: translateY(-50%);
@@ -454,7 +456,7 @@ footer {
 .field input {
   width: 100%; padding: 13px 4px 13px 34px;
   background: transparent;
-  border: none; border-bottom: 1px solid rgba(55,65,58,0.32);
+  border: none; border-bottom: 1px solid rgba(163,58,44,0.4);
   color: #26302b; font-family: inherit; font-size: 15px; outline: none;
   caret-color: #a33a2c;
   border-radius: 0;
@@ -462,7 +464,7 @@ footer {
 }
 .field input:focus { border-bottom-color: #a33a2c; }
 .field:focus-within .icon { color: #8f3226; }
-.field input::placeholder { color: rgba(60,70,62,0.42); letter-spacing: 4px; font-family: var(--serif); font-style: italic; }
+.field input::placeholder { color: rgba(52,62,55,0.58); letter-spacing: 4px; font-family: var(--serif); font-style: italic; }
 .field { overflow: hidden; }
   .field::after {
   content: ""; position: absolute; left: 34px; right: 0; bottom: 0; height: 1px;
@@ -477,20 +479,17 @@ footer {
 .login-btn {
   width: 100%; padding: 15px; margin-top: 14px;
   border: none; border-radius: 4px;
-  background: radial-gradient(120% 160% at 50% 42%, rgba(178,60,44,0.4), rgba(150,48,40,0.2) 70%, rgba(120,38,32,0.14)); color: #f0c4b8;
+  background: radial-gradient(130% 170% at 50% 40%, #a23d2e, #8a3325 75%, #772b20); color: #f4ead9;
   font-family: var(--serif);
   font-size: 17px; font-weight: 700; letter-spacing: 14px; text-indent: 14px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.4);
   cursor: pointer; position: relative; overflow: hidden;
-  box-shadow:
-    inset 0 0 0 2px rgba(176,50,40,0.85),
-    inset 10px 6px 18px -12px rgba(20,5,4,0.9),
-    inset -12px -8px 20px -14px rgba(20,5,4,0.8);
+  box-shadow: 0 6px 22px rgba(120,40,28,0.35), inset 0 1px 0 rgba(255,225,205,0.28);
   transition: all 0.25s;
 }
 .login-btn::before {
   content: ""; position: absolute; inset: -2px; pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.02 0 0 0 0 0.01 0 0 0 0 0.01 0 0 0 0.8 -0.28'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23b)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.02 0 0 0 0 0.01 0 0 0 0 0.01 0 0 0 0.35 -0.28'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23b)'/%3E%3C/svg%3E");
   opacity: 1;
   border-radius: 4px;
 }
@@ -501,8 +500,8 @@ footer {
     radial-gradient(6px 14px at 100% 50%, rgba(120,30,22,0.45), transparent 70%);
 }
 .login-btn:hover {
-  background: rgba(178,60,44,0.88); color: #f9efe7;
-  box-shadow: inset 0 0 0 2px rgba(230,120,100,0.95), 0 4px 30px rgba(178,60,44,0.32);
+  background: radial-gradient(130% 170% at 50% 40%, #c04e3c, #a34030 75%, #8d3527); color: #fdf6ea;
+  box-shadow: 0 8px 30px rgba(140,48,32,0.45), inset 0 1px 0 rgba(255,230,210,0.35);
 }
 .login-btn:active { transform: translateY(2px) scale(0.985); letter-spacing: 13px; }
 .login-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
@@ -514,7 +513,7 @@ footer {
 .login-foot {
   margin-top: 30px; padding: 0 12px;
   font-family: var(--serif);
-  font-size: 13px; letter-spacing: 3px; color: #a3bcae; text-align: center;
+  font-size: 13px; letter-spacing: 3px; color: #c2d6c9; text-align: center;
   line-height: 2;
   animation: stageIn 1s 0.6s cubic-bezier(0.22,1,0.36,1) both;
 }
@@ -597,11 +596,11 @@ footer {
     <div class="login-divider"></div>
     <div class="login-card" id="loginCard">
       <div class="field">
-        <input id="loginName" placeholder="相逢何必曾相识" autocomplete="off" maxlength="20" aria-label="你的代号">
+        <input id="loginName" placeholder="留个名号" autocomplete="off" maxlength="20" aria-label="你的代号">
         <span class="icon">名</span>
       </div>
       <div class="field">
-        <input id="loginPass" type="password" placeholder="心有灵犀一点通" autocomplete="off" aria-label="进入口令">
+        <input id="loginPass" type="password" placeholder="输入口令" autocomplete="off" aria-label="进入口令">
         <span class="icon">印</span>
       </div>
       <div class="login-err" id="loginErr"></div>
@@ -931,7 +930,7 @@ async function doLogin() {
   const name = (nameInput.value || '').trim();
   const pw = passInput.value || '';
   if (!name) { showLoginErr('请输入名字'); return; }
-  if (!pw) { showLoginErr('请心有灵犀一点通'); return; }
+  if (!pw) { showLoginErr('请输入口令'); return; }
   myName = name.slice(0, 20);
   loginBtn.disabled = true;
   loginBtn.textContent = '登录中...';
