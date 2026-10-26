@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>风信</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  --bg: #04070a;
+  --panel: rgba(9, 17, 22, 0.72);
+  --border: rgba(64, 236, 181, 0.10);
+  --border-strong: rgba(64, 236, 181, 0.22);
+  --green: #5fd7b0;
+  --green-bright: #9fe8cf;
+  --teal: #6fbfa8;
+  --cinnabar: #c2453a;
+  --cinnabar-bright: #e05a4b;
+  --gold: #c9a86a;
+  --moonlight: #e8e3d5;
+  --dim: #3d6b5c;
+  --dimmer: #26463b;
+  --text: #bfeee0;
+  --red: #ff5c72;
+  --serif: "Noto Serif SC", "Songti SC", "STSong", "SimSun", "FangSong", serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", "wqy-microhei", "Noto Sans Mono CJK SC", monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-mono);
+  background: var(--bg);
+  color: var(--green);
+  height: 100dvh; display: flex; flex-direction: column;
+  max-width: 920px; margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(64,236,181,0.25); color: #eafff8; }
+
+/* ══ 氛围层 1：深空底色（墨色 + 微光地平线）══ */
+.bg-base {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 50% -10%, rgba(64,236,181,0.08), transparent 60%),
+    radial-gradient(80% 55% at 85% 110%, rgba(79,216,232,0.05), transparent 60%),
+    linear-gradient(180deg, #0b0e0d 0%, #080a09 55%, #0a100e 100%);
+}
+/* ══ 氛围层 1.5：宣纸纤维纹理 ══ */
+.bg-paper {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.83 0 0 0 0 0.76 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+/* ══ 氛围层 2：水墨远山剪影，给界面"世界" ══ */
+.bg-mountains {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 44vh; z-index: 0; pointer-events: none;
+  opacity: 0.9;
+}
+.bg-mountains svg { width: 100%; height: 100%; display: block; }
+.mtn-far  { animation: drift 90s ease-in-out infinite alternate; }
+.mtn-near { animation: drift 140s ease-in-out infinite alternate-reverse; }
+@keyframes drift { from { transform: translateX(-1.2%); } to { transform: translateX(1.2%); } }
+/* ══ 氛围层 3：巨型「信」字水印，字浮现出质感 ══ */
+.bg-watermark {
+  position: fixed; left: 50%; top: 54%; transform: translate(-50%, -50%);
+  z-index: 0; pointer-events: none;
+  font-family: var(--serif);
+  font-size: min(72vh, 66vw); line-height: 1;
+  color: rgba(196, 214, 204, 0.05);
+  text-shadow: 0 0 120px rgba(180, 205, 192, 0.05);
+  animation: wmBreath 16s ease-in-out infinite;
+  user-select: none;
+}
+@keyframes wmBreath {
+  0%,100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  50%     { opacity: 1;    transform: translate(-50%, -50%) scale(1.015); }
+}
+/* ══ 氛围层 4：缓慢漂浮的流萤光尘 ══ */
+.motes { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.motes i {
+  position: absolute; bottom: -8px; width: 3px; height: 3px; border-radius: 50%;
+  background: rgba(125,255,217,0.75);
+  box-shadow: 0 0 8px 1px rgba(64,236,181,0.5);
+  opacity: 0;
+  animation: rise linear infinite;
+}
+@keyframes rise {
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  8%   { opacity: 0.9; }
+  70%  { opacity: 0.5; }
+  100% { transform: translateY(-92vh) translateX(6vw); opacity: 0; }
+}
+/* ══ 氛围层 5：轻扫描线 ══ */
+.bg-scan {
+  position: fixed; inset: 0; pointer-events: none; z-index: 40;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0 1px, transparent 1px 3px);
+  animation: breathe 7s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100%{opacity:0.8;} 50%{opacity:1;} }
+
+header, #seatsBar, #msgs, footer { position: relative; z-index: 2; }
+
+/* ── 顶栏 ── */
+header {
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid var(--border); border-top: none;
+  border-bottom: 1px solid var(--border-strong);
+  padding: 14px 20px;
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.brand { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.brand b {
+  font-family: var(--serif);
+  font-weight: 700; letter-spacing: 5px; font-size: 17px;
+  color: var(--green-bright);
+  text-shadow: 0 0 14px rgba(64,236,181,0.4);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.brand .sigil {
+  font-family: var(--serif);
+  font-size: 11px; letter-spacing: 3px; color: var(--dim);
+  white-space: nowrap;
+}
+.brand .sigil::before { content: "❖ "; color: var(--gold); opacity: .8; }
+#status {
+  font-size: 10px; letter-spacing: 2px; color: var(--dim);
+  display: flex; align-items: center; gap: 7px;
+  flex-shrink: 0; white-space: nowrap;
+}
+#status::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--dim); flex-shrink: 0;
+}
+#status.ok { color: var(--green); }
+#status.ok::before { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2.4s ease-in-out infinite; }
+#status.err { color: var(--red); }
+#status.err::before { background: var(--red); box-shadow: 0 0 8px rgba(255,92,114,.8); }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.5;} }
+@keyframes blink { 50% { opacity: 0.25; } }
+
+/* ── 十龙席位 ── */
+#seatsBar {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 11px 14px;
+  background: rgba(8, 15, 20, 0.55);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  justify-content: center;
+}
+.seat-chip {
+  position: relative;
+  font-family: var(--serif);
+  font-size: 12px; letter-spacing: 2px;
+  padding: 5px 12px; border-radius: 4px;
+  border: 1px solid rgba(64,236,181,0.16);
+  color: #4a7868; opacity: 0.9;
+  white-space: nowrap;
+  transition: color .4s, border-color .4s, box-shadow .4s, background .4s;
+}
+.seat-chip.occupied {
+  color: var(--green-bright); opacity: 1;
+  border-color: rgba(64,236,181,0.55);
+  background: linear-gradient(160deg, rgba(64,236,181,0.16), rgba(64,236,181,0.05));
+  box-shadow: 0 0 14px rgba(64,236,181,0.28), inset 0 0 10px rgba(64,236,181,0.08);
+  animation: seatAura 2.6s ease-in-out infinite;
+}
+.seat-chip.mine {
+  border-color: var(--green-bright);
+  background: linear-gradient(160deg, rgba(64,236,181,0.26), rgba(64,236,181,0.10));
+  box-shadow: 0 0 18px rgba(64,236,181,0.5), inset 0 0 12px rgba(64,236,181,0.15);
+}
+.seat-chip.occupied::after {
+  content: ""; position: absolute; top: 4px; right: 4px;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 6px var(--green);
+}
+@keyframes seatAura {
+  0%, 100% { box-shadow: 0 0 14px rgba(64,236,181,0.28), inset 0 0 10px rgba(64,236,181,0.08); }
+  50%      { box-shadow: 0 0 22px rgba(64,236,181,0.42), inset 0 0 14px rgba(64,236,181,0.12); }
+}
+
+/* ── 消息区 ── */
+#msgs {
+  flex: 1; overflow-y: auto; padding: 22px 20px;
+  border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  scrollbar-width: thin; scrollbar-color: var(--dimmer) transparent;
+}
+#msgs::-webkit-scrollbar { width: 5px; }
+#msgs::-webkit-scrollbar-thumb { background: var(--dimmer); border-radius: 3px; }
+
+/* 空状态：大印 + 对联式留白 */
+#emptyHint {
+  position: absolute; inset: 0; display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px; pointer-events: none; z-index: 1;
+}
+#emptyHint.show { display: flex; }
+#emptyHint .seal-box {
+  width: 88px; height: 88px; display: grid; place-items: center;
+  border: 2px solid rgba(216,179,106,0.55); border-radius: 8px;
+  font-family: var(--serif); font-size: 44px; color: var(--gold);
+  text-shadow: 0 0 20px rgba(216,179,106,0.45);
+  box-shadow: 0 0 36px rgba(216,179,106,0.10), inset 0 0 20px rgba(216,179,106,0.06);
+  animation: sealBreath 4s ease-in-out infinite;
+  position: relative;
+}
+#emptyHint .seal-box::after {
+  content: ""; position: absolute; inset: 5px;
+  border: 1px solid rgba(216,179,106,0.3); border-radius: 4px;
+}
+@keyframes sealBreath { 0%,100%{opacity:.85; transform: scale(1) rotate(-2deg);} 50%{opacity:1; transform: scale(1.03) rotate(-2deg);} }
+#emptyHint .t1 { font-family: var(--serif); font-size: 15px; letter-spacing: 10px; text-indent: 10px; color: #6fa593; }
+#emptyHint .t2 { font-family: var(--serif); font-size: 12px; letter-spacing: 4px; color: var(--dim); }
+
+.msg { margin-bottom: 16px; display: flex; }
+.msg.me { flex-direction: row-reverse; }
+.msg .sender-meta { width: calc(30em + 34px); font-size: 10px; color: var(--dim); margin-bottom: 5px; letter-spacing: 1px; }
+.msg:not(.me) .sender-meta::before { content: "◦ "; color: var(--teal); }
+.msg.me .sender-meta::before { content: "◦ "; color: var(--green); }
+.bubble {
+  box-sizing: content-box;
+  font-family: monospace, ui-monospace, "wqy-microhei", "Noto Sans Mono CJK SC", monospace;
+  width: 30em;
+  padding: 11px 15px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px 10px 10px 3px;
+  font-size: 14px; line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  color: var(--text);
+  background: rgba(6, 14, 16, 0.55);
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+.msg { animation: msgIn 0.4s cubic-bezier(0.22,1,0.36,1); }
+@keyframes msgIn { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+.msg:not(.me) .bubble { border-color: rgba(79,216,232,0.22); }
+.msg.me .bubble {
+  border-radius: 10px 10px 3px 10px;
+  border-color: rgba(64,236,181,0.5); color: #dbfff2;
+  background: linear-gradient(135deg, rgba(64,236,181,0.14), rgba(64,236,181,0.04));
+  box-shadow: 0 0 18px rgba(64,236,181,0.16), 0 0 8px rgba(64,236,181,0.08) inset;
+}
+.time { font-size: 10px; color: var(--dimmer); letter-spacing: 2px; margin: 14px 0; text-align: center; }
+.time::before, .time::after { content: " ─── "; opacity: 0.5; }
+
+/* ── 输入区 ── */
+footer {
+  display: flex; align-items: stretch;
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom)); gap: 6px;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid var(--border); border-bottom: none;
+  border-top: 1px solid var(--border-strong);
+}
+#input {
+  flex: 1; padding: 0 16px; height: 46px;
+  border: 1px solid var(--border-strong); border-radius: 8px 0 0 8px;
+  background: rgba(4, 9, 12, 0.8); color: var(--green-bright);
+  font-family: inherit; font-size: 14px; outline: none;
+  caret-color: var(--green);
+  min-width: 0;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+#input::placeholder { color: #6ea191; letter-spacing: 3px; font-family: var(--serif); }
+#input:focus { border-color: rgba(64,236,181,0.6); box-shadow: 0 0 0 3px rgba(64,236,181,0.08), 0 0 16px rgba(64,236,181,0.12); }
+.send-btn {
+  height: 46px; padding: 0 22px;
+  border: 1px solid rgba(64,236,181,0.6); border-left: none; border-radius: 0 8px 8px 0;
+  background: linear-gradient(160deg, rgba(64,236,181,0.16), rgba(64,236,181,0.05));
+  color: var(--green-bright);
+  font-family: var(--serif);
+  font-size: 14px; font-weight: 700; letter-spacing: 4px; text-indent: 2px;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: all 0.2s;
+}
+.send-btn:hover { background: var(--green); color: #04211a; box-shadow: 0 0 20px rgba(64,236,181,0.45); }
+.send-btn:active { transform: scale(0.97); }
+.send-btn::after {
+  content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(220,255,245,0.35), transparent);
+  transform: skewX(-20deg);
+  animation: sheen 3.2s ease-in-out infinite;
+}
+@keyframes sheen { 0%,60% { left: -80%; } 100% { left: 160%; } }
+
+/* ── 退出按钮 ── */
+.logout-btn {
+  margin-left: 4px; padding: 4px 11px;
+  border: 1px solid rgba(255,92,114,0.5); border-radius: 5px;
+  background: transparent; color: var(--red);
+  font-family: inherit; font-size: 10px; font-weight: bold; letter-spacing: 2px;
+  cursor: pointer; flex-shrink: 0;
+  transition: all .2s;
+}
+.logout-btn:hover { background: var(--red); color: #210409; box-shadow: 0 0 12px rgba(255,92,114,0.5); }
+
+/* ═══════ 登录帷幕 ═══════ */
+#loginOverlay {
+  position: fixed; inset: 0; z-index: 50;
+  background: #030608;
+  display: flex; align-items: center; justify-content: center;
+  overflow-y: auto; overscroll-behavior: contain;
+  transition: opacity 0.7s ease;
+}
+#loginOverlay.hidden { display: none; }
+#loginOverlay.fading { opacity: 0; pointer-events: none; }
+.login-stage {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 28px 24px calc(28px + env(safe-area-inset-bottom));
+  width: 100%; min-height: 100%; position: relative; box-sizing: border-box;
+}
+
+/* ── 朱砂印章徽记 ── */
+.sigil-seal {
+  position: relative; width: 108px; height: 108px; margin-bottom: 30px;
+  animation: stampIn 0.7s cubic-bezier(0.34,1.4,0.64,1) 0.15s both;
+}
+@keyframes stampIn {
+  0%   { opacity: 0; transform: scale(1.5) rotate(-6deg); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+.sigil-seal .frame {
+  position: absolute; inset: 0;
+  border: 3px solid rgba(194,69,58,0.8); border-radius: 8px;
+  filter: url(#sealRough);
+}
+.sigil-seal .glyph {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: var(--serif); font-size: 54px; font-weight: 700;
+  color: #c9564a;
+  filter: url(#sealRough);
+  animation: glyphBreath 5s ease-in-out infinite;
+}
+@keyframes glyphBreath { 0%,100%{opacity:.88;} 50%{opacity:1;} }
+
+/* ── 标题与副诗 ── */
+.login-title {
+  font-family: var(--serif);
+  font-size: 27px; font-weight: 700; letter-spacing: 6px; padding-left: 6px;
+  color: var(--moonlight); text-align: center;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.8), 0 0 30px rgba(232,227,213,0.08);
+  animation: stageIn 1s 0.12s cubic-bezier(0.22,1,0.36,1) both;
+}
+.login-seal-sub {
+  margin-top: 10px;
+  font-family: var(--serif);
+  font-size: 11px; letter-spacing: 6px; text-indent: 6px;
+  color: rgba(201,168,106,0.75); text-align: center;
+  animation: stageIn 1s 0.22s cubic-bezier(0.22,1,0.36,1) both;
+}
+.login-poem {
+  margin-top: 12px;
+  font-family: var(--serif);
+  font-size: 12px; letter-spacing: 3px; color: #93b3a6; text-align: center;
+  animation: stageIn 1s 0.26s cubic-bezier(0.22,1,0.36,1) both;
+}
+.login-poem .sep { color: rgba(216,179,106,0.6); margin: 0 6px; }
+.login-divider {
+  margin: 26px 0 26px; width: 210px; height: 1px; position: relative;
+  background: linear-gradient(90deg, transparent, rgba(201,168,106,0.45), transparent);
+  animation: stageIn 1s 0.34s cubic-bezier(0.22,1,0.36,1) both;
+}
+.login-divider::after {
+  content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(194,69,58,0.85); box-shadow: 0 0 10px rgba(194,69,58,0.4);
+  padding: 0;
+}
+
+/* ── 登录卡 ── */
+.login-card {
+  width: clamp(280px, 86vw, 420px);
+  background-clip: padding-box;
+  background: linear-gradient(170deg, rgba(13, 24, 29, 0.94), rgba(8, 15, 20, 0.94));
+  border: 1px solid rgba(210,180,140,0.14); border-radius: 14px;
+  padding: 32px 30px 28px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.55), 0 0 50px rgba(210,180,140,0.03), inset 0 1px 0 rgba(235,225,205,0.05);
+  position: relative; overflow: hidden;
+  animation: cardIn 1s 0.42s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+.corner { position: absolute; width: 22px; height: 22px; pointer-events: none; opacity: 0.5; }
+.corner-tl { top: 8px; left: 8px; border-top: 1px solid rgba(201,168,106,0.5); border-left: 1px solid rgba(201,168,106,0.5); }
+.corner-tr { top: 8px; right: 8px; border-top: 1px solid rgba(201,168,106,0.5); border-right: 1px solid rgba(201,168,106,0.5); }
+.corner-bl { bottom: 8px; left: 8px; border-bottom: 1px solid rgba(201,168,106,0.5); border-left: 1px solid rgba(201,168,106,0.5); }
+.corner-br { bottom: 8px; right: 8px; border-bottom: 1px solid rgba(201,168,106,0.5); border-right: 1px solid rgba(201,168,106,0.5); }
+@keyframes scanLine { 0%,100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes stageIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes cardIn { from { opacity: 0; transform: translateY(22px) scale(0.96); } to { opacity: 1; transform: none; } }
+
+.field { position: relative; margin-bottom: 16px; }
+.field .icon {
+  position: absolute; left: 2px; top: 50%; transform: translateY(-50%);
+  font-family: var(--serif);
+  font-size: 14px; color: rgba(194,69,58,0.75); pointer-events: none;
+  letter-spacing: 2px;
+  transition: color .3s;
+}
+.field input {
+  width: 100%; padding: 13px 4px 13px 40px;
+  background: transparent;
+  border: none; border-bottom: 1px solid rgba(232,227,213,0.16);
+  color: var(--moonlight); font-family: inherit; font-size: 15px; outline: none;
+  caret-color: var(--cinnabar-bright);
+  border-radius: 0;
+  transition: border-color 0.3s;
+}
+.field input:focus { border-bottom-color: rgba(194,69,58,0.85); }
+.field:focus-within .icon { color: var(--cinnabar-bright); }
+.field input::placeholder { color: rgba(255,245,220,0.32); letter-spacing: 3px; font-family: var(--serif); }
+.field { overflow: hidden; }
+.field::after {
+  content: ""; position: absolute; left: 40px; right: 0; bottom: 0; height: 1px;
+  background: rgba(194,69,58,0.85);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
+}
+.field:focus-within::after { transform: scaleX(1); }
+.field input:focus { border-bottom-color: transparent; }
+
+.login-err { min-height: 18px; font-size: 11px; color: var(--red); text-align: center; margin: 2px 0 10px; letter-spacing: 1px; }
+.login-btn {
+  width: 100%; padding: 15px; margin-top: 10px;
+  border: none; border-radius: 4px;
+  background: rgba(194,69,58,0.16); color: #d99c90;
+  font-family: var(--serif);
+  font-size: 17px; font-weight: 700; letter-spacing: 14px; text-indent: 14px;
+  cursor: pointer; position: relative; overflow: hidden;
+  box-shadow: inset 0 0 0 2px rgba(194,69,58,0.7);
+  filter: url(#sealRough);
+  transition: all 0.25s;
+}
+.login-btn::before {
+  content: ""; position: absolute; inset: -2px; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.28' numOctaves='4' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.03 0 0 0 0 0.02 0 0 0 0 0.02 0 0 0 0.9 -0.25'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23b)'/%3E%3C/svg%3E");
+  opacity: 0.85;
+  border-radius: 4px;
+}
+.login-btn:hover {
+  background: rgba(194,69,58,0.88); color: #f9efe7;
+  box-shadow: inset 0 0 0 2px rgba(230,120,100,0.95), 0 4px 30px rgba(194,69,58,0.32);
+}
+.login-btn:active { transform: translateY(2px) scale(0.985); letter-spacing: 13px; }
+.login-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+.login-btn:focus-visible { outline: 2px solid var(--cinnabar-bright); outline-offset: 2px; }
+.login-card.shake { animation: shake 0.4s ease; border-color: rgba(255,92,114,0.55) !important; }
+@keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-7px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(3px);} }
+
+/* ── 登录页底部：宋体小诗 ── */
+.login-foot {
+  margin-top: 30px; padding: 0 12px;
+  font-family: var(--serif);
+  font-size: 12px; letter-spacing: 5px; color: #7d9a8e; text-align: center;
+  line-height: 2;
+  animation: stageIn 1s 0.6s cubic-bezier(0.22,1,0.36,1) both;
+}
+.login-foot .gold-line { color: rgba(216,179,106,0.5); font-size: 9px; letter-spacing: 6px; }
+
+/* ── 移动端 ── */
+@media (max-height: 780px) {
+  .sigil-seal { width: 84px; height: 84px; margin-bottom: 20px; }
+  .sigil-seal .glyph { font-size: 42px; }
+  .sigil-seal .halo { inset: -16px; }
+  .sigil-seal .halo2 { inset: -28px; }
+  .login-poem { margin-top: 8px; }
+  .login-divider { margin: 16px 0; }
+  .login-card { padding: 22px 20px 20px; }
+  .login-foot { margin-top: 16px; }
+}
+@media (max-width: 640px) {
+  .brand .sigil { display: none; }
+  .brand b { font-size: 14px; letter-spacing: 3px; }
+  #status { font-size: 10px; letter-spacing: 1px; }
+  #msgs { padding: 14px 10px; }
+  .msg .sender-meta { width: calc(24em + 34px); }
+  .bubble { width: 24em; font-size: 13px; }
+  .seat-chip { font-size: 11px; padding: 4px 9px; letter-spacing: 1px; }
+  .login-card { padding: 26px 20px 22px; border-radius: 12px; }
+  .login-title { font-size: 20px; letter-spacing: 4px; padding-left: 4px; }
+  .login-poem { font-size: 11px; letter-spacing: 3px; }
+  .sigil-seal { width: 88px; height: 88px; }
+  .sigil-seal .glyph { font-size: 44px; }
+  footer { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  .send-btn { padding: 0 14px; letter-spacing: 2px; }
+  .bg-watermark { font-size: 78vw; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<!-- 氛围层 -->
+<div class="bg-base"></div>
+<div class="bg-paper"></div>
+<div class="bg-mountains">
+  <svg viewBox="0 0 1440 400" preserveAspectRatio="none">
+    <g class="mtn-far">
+      <path d="M0,260 C120,180 220,150 340,190 C460,230 520,120 660,110 C800,100 860,200 980,210 C1100,220 1180,140 1290,160 C1370,174 1410,210 1440,220 L1440,400 L0,400 Z" fill="rgba(46,66,58,0.38)"/>
+      <path d="M0,262 C120,182 220,152 340,192 C460,232 520,122 660,112 C800,102 860,202 980,212 C1100,222 1180,142 1290,162 C1370,176 1410,212 1440,222" fill="none" stroke="rgba(190,220,200,0.16)" stroke-width="1.5"/>
+    </g>
+    <g class="mtn-near">
+      <path d="M0,320 C160,250 300,270 430,290 C560,310 640,220 790,230 C940,240 1020,300 1160,296 C1290,292 1380,260 1440,270 L1440,400 L0,400 Z" fill="rgba(22,34,29,0.92)"/>
+      <path d="M0,322 C160,252 300,272 430,292 C560,312 640,222 790,232 C940,242 1020,302 1160,298 C1290,294 1380,262 1440,272" fill="none" stroke="rgba(190,220,200,0.09)" stroke-width="1.5"/>
+    </g>
+  </svg>
+</div>
+<div class="bg-watermark">信</div>
+<div class="motes" id="motes"></div>
+<div class="bg-scan"></div>
+
+<!-- 登录帷幕 -->
+<div id="loginOverlay">
+  <div class="login-stage">
+    <div class="sigil-seal">
+      <svg width="0" height="0" style="position:absolute">
+        <filter id="sealRough"><feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="7" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter>
+      </svg>
+      <div class="frame"></div>
+      <div class="frame2"></div>
+      <div class="glyph">信</div>
+    </div>
+    <div class="login-title">天地一家奶龙盟</div>
+    <div class="login-seal-sub">风信子屋 · 恭迎入席</div>
+    <div class="login-divider"></div>
+    <div class="login-card" id="loginCard">
+      <div class="field">
+        <input id="loginName" placeholder="留个名号" autocomplete="off" maxlength="20" aria-label="你的代号">
+        <span class="icon">名</span>
+      </div>
+      <div class="field">
+        <input id="loginPass" type="password" placeholder="输入口令" autocomplete="off" aria-label="进入口令">
+        <span class="icon">印</span>
+      </div>
+      <div class="login-err" id="loginErr"></div>
+      <button id="loginBtn" class="login-btn">进入</button>
+      <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+      <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    </div>
+    <div class="login-foot">
+      入席即盟<span class="gold-line">　·　</span>退席即焚
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="brand">
+    <b>天地一家奶龙盟</b>
+    <span class="sigil">风信 · 人间消息</span>
+  </div>
+  <span id="status">候风…</span>
+  <button id="logoutBtn" class="logout-btn" style="display:none" onclick="logout()">EXIT</button>
+</header>
+
+<div id="seatsBar"></div>
+
+<div id="msgs">
+  <div id="emptyHint">
+    <div class="seal-box">候</div>
+    <div class="t1">虚位以待</div>
+    <div class="t2">海内存知己 · 天涯若比邻</div>
+  </div>
+</div>
+
+<footer>
+  <input id="input" placeholder="且传一纸风信…" autocomplete="off">
+  <button class="send-btn" onclick="send()">发送</button>
+</footer>
+
+<script>
+// ====== 大数与 SRP 工具（BigInt 实现，与浏览器原生兼容） ======
+const hexToBytes = (h) => { h = h.length % 2 ? '0' + h : h; const u = new Uint8Array(h.length / 2); for (let i = 0; i < u.length; i++) u[i] = parseInt(h.substr(i * 2, 2), 16); return u; };
+const bytesToHex = (b) => Array.from(b).map(x => x.toString(16).padStart(2, '0')).join('');
+const b64enc = (b) => btoa(String.fromCharCode(...b));
+const b64dec = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+let N, G, NB;
+async function loadParams() {
+  const r = await fetch('/srp-params.json');
+  const p = await r.json();
+  N = BigInt('0x' + p.N); G = BigInt('0x' + p.g);
+  NB = p.N.length / 2;
+}
+
+function modPow(base, exp, mod) {
+  base = ((base % mod) + mod) % mod;
+  let r = 1n, b = base, e = exp;
+  while (e > 0n) { if (e & 1n) r = r * b % mod; b = b * b % mod; e >>= 1n; }
+  return r;
+}
+const toBuf = (bn) => { let h = bn.toString(16); if (h.length % 2) h = '0' + h; h = h.padStart(NB * 2, '0'); return hexToBytes(h); };
+const toBn = (buf) => BigInt('0x' + bytesToHex(buf));
+
+async function sha256(...parts) {
+  let buf;
+  if (parts.length === 1) buf = parts[0];
+  else { let len = 0; parts.forEach(p => len += p.length); buf = new Uint8Array(len); let o = 0; parts.forEach(p => { buf.set(p, o); o += p.length; }); }
+  return new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
+}
+
+function randScalar() {
+  for (;;) {
+    const c = toBn(crypto.getRandomValues(new Uint8Array(NB)));
+    if (c > 0n && c < N - 1n) return c;
+  }
+}
+
+// HKDF-SHA256（Web Crypto）
+async function hkdf(ikm, saltStr, infoStr) {
+  const base = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt: new TextEncoder().encode(saltStr), info: new TextEncoder().encode(infoStr) },
+    base, 256);
+  return new Uint8Array(bits);
+}
+
+async function computeX(saltBytes, identity, password) {
+  const inner = await sha256(new TextEncoder().encode(String(identity) + ':' + password));
+  return toBn(await sha256(saltBytes, inner));
+}
+
+const MASTER_PASSPHRASE = '十里坡剑神';
+// 10 座预置 salt（公开安全，不含口令），与服务端 preset_seats.json 对应
+const SEAT_SALTS = [
+  '3f18972f5055c93ca2bc7dd04d6881464bcfab7202a993f80ca2a2084034910a',
+  'e132f4a5d599b36831b1a0c0c6e7392d699ce445ce125ecb1addad182ebddfa4',
+  '260a9f743955198167081deeba70562631ea65646d0e1e08f612c6c4e63dbe27',
+  'e81ea2a0f920524a964be86fccebb91dd58eb41fcff842de7da4741a3f7d8d2c',
+  '855ab13abf4b2e1bf269c850579441d5f38b3e29e77c0d664f3642e362434442',
+  '0a67795f6653ce48ce543dfa89699584f6b79a982793159e0ea0e335fe382280',
+  'de0baf4ebf30257fca2891b4f1a509e5c334382343884df2d664ecd208cc3f78',
+  '6291e2bc0cf92c1f27af7303c3e1e634e8cc8de079b594e6536c11cbbbd2f77e',
+  'a57947efa6ba69d29fa2755ad4291af6d998b67e58d52c328afe9c6590c07bb1',
+  'e6c868c58dbf41dc3a60b775fe68df3e83d29a7486c0b1eab6d475eb44a5a4bb',
+];
+
+// 逐座尝试：对每座用它预置的 salt + 固定身份 seatN + 口令派生，直到某座匹配
+function trySeat(seatNum, password, userName) {
+  return new Promise((resolve, reject) => {
+    const normName = userName || '';
+    const a = randScalar();
+    const A = modPow(G, a, N);
+    const identity = 'seat' + seatNum;   // 固定身份，与服务端预置一致
+    const realSalt = hexToBytes(SEAT_SALTS[seatNum - 1]);
+
+    const ch = new WebSocket(wsUrl());
+    const timeout = setTimeout(() => { ch.close(); reject(new Error('timeout')); }, 20000);
+    ch.onopen = () => ch.send(JSON.stringify({
+      type: 'srp_hello', name: normName, seat: seatNum, A: bytesToHex(toBuf(A))
+    }));
+    ch.onerror = () => { clearTimeout(timeout); reject(new Error('conn')); };
+    ch.onmessage = async (e) => {
+      const m = JSON.parse(e.data);
+      if (m.type === 'srp_challenge') {
+        try {
+          const B = toBn(hexToBytes(m.B));
+          if (B % N === 0n) throw new Error('badB');
+          const xr = await computeX(hexToBytes(m.salt), identity, password);
+          const kMult = toBn(await sha256(toBuf(N), toBuf(G)));
+          const u = toBn(await sha256(toBuf(A), toBuf(B)));
+          if (u === 0n) throw new Error('u0');
+          const base = ((B - kMult * modPow(G, xr, N)) % N + N) % N;
+          const S = modPow(base, a + u * xr, N);
+          const Kbuf = toBuf(S);
+          const keyBytes = await hkdf(Kbuf, 'chat2-srp-salt', 'chat2-session-key-v1');
+          const M1 = await sha256(toBuf(A), toBuf(B), Kbuf);
+          ch.send(JSON.stringify({ type: 'srp_verify', M1: bytesToHex(M1) }));
+          const M2exp = await sha256(toBuf(A), M1, Kbuf);
+          ch.onmessage = async (e2) => {
+            const m2 = JSON.parse(e2.data);
+            clearTimeout(timeout);
+            if (m2.type === 'srp_ready' && m2.M2 === bytesToHex(M2exp)) {
+              const key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['encrypt', 'decrypt']);
+              // 保留连接 ch（不关闭），登录后继续使用
+              resolve({ ok: true, key, seatNum, ch });
+            } else if (m2.type === 'auth_result' && m2.ok === false) {
+              ch.close();
+              reject(new Error(m2.error === 'seat_taken' ? 'seat_taken' : 'bad_password'));
+            }
+          };
+        } catch (err) { clearTimeout(timeout); ch.close(); reject(err); }
+      } else if (m.type === 'auth_result' && m.ok === false) {
+        clearTimeout(timeout); ch.close();
+        reject(new Error(m.error === 'seat_taken' ? 'seat_taken' : (m.error === 'no_name' ? 'no_name' : 'bad_password')));
+      }
+    };
+  });
+}
+
+// 万能口令登录：固定身份 'master'，服务端用内置万能验证子校验；不占座、任意名字
+function masterLogin(password) {
+  return new Promise((resolve, reject) => {
+    const a = randScalar();
+    const A = modPow(G, a, N);
+    const identity = 'master';
+    const ch = new WebSocket(wsUrl());
+    const timeout = setTimeout(() => { ch.close(); reject(new Error('timeout')); }, 20000);
+    ch.onopen = () => ch.send(JSON.stringify({
+      type: 'srp_hello', name: '', identity: 'master', A: bytesToHex(toBuf(A))
+    }));
+    ch.onerror = () => { clearTimeout(timeout); reject(new Error('conn')); };
+    ch.onmessage = async (e) => {
+      const m = JSON.parse(e.data);
+      if (m.type === 'srp_challenge') {
+        try {
+          const xr = await computeX(hexToBytes(m.salt), identity, password);
+          const B = toBn(hexToBytes(m.B));
+          if (B % N === 0n) throw new Error('badB');
+          const kMult = toBn(await sha256(toBuf(N), toBuf(G)));
+          const u = toBn(await sha256(toBuf(A), toBuf(B)));
+          if (u === 0n) throw new Error('u0');
+          const base = ((B - kMult * modPow(G, xr, N)) % N + N) % N;
+          const S = modPow(base, a + u * xr, N);
+          const Kbuf = toBuf(S);
+          const keyBytes = await hkdf(Kbuf, 'chat2-srp-salt', 'chat2-session-key-v1');
+          const M1 = await sha256(toBuf(A), toBuf(B), Kbuf);
+          ch.send(JSON.stringify({ type: 'srp_verify', M1: bytesToHex(M1) }));
+          const M2exp = await sha256(toBuf(A), M1, Kbuf);
+          ch.onmessage = async (e2) => {
+            const m2 = JSON.parse(e2.data);
+            clearTimeout(timeout);
+            if (m2.type === 'srp_ready' && m2.M2 === bytesToHex(M2exp)) {
+              const key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['encrypt', 'decrypt']);
+              resolve({ ch, key, isMaster: true });   // 保留 ch
+            } else { ch.close(); reject(new Error('M2 mismatch')); }
+          };
+        } catch (err) { clearTimeout(timeout); ch.close(); reject(err); }
+      } else if (m.type === 'auth_result' && m.ok === false) {
+        clearTimeout(timeout); ch.close(); reject(new Error(m.error || 'bad_password'));
+      }
+    };
+  });
+}
+
+async function srpClient(name, password) {
+  const normName = String(name || '').trim().slice(0, 20);
+  if (!normName) throw new Error('no_name');
+  // 万能口令：固定 master 服务器（保留原有逻辑）
+  if (password === MASTER_PASSPHRASE) {
+    return masterLogin(password);
+  }
+  // 普通口令：逐座尝试 1-10，直到某座匹配（口令正确）。全部不匹配=>口令错误
+  const errors = [];
+  for (let seat = 1; seat <= 10; seat++) {
+    try {
+      const r = await trySeat(seat, password, normName);
+      // 该座匹配成功：绑定名字（首登占座）或验证通过，返回保留的连接
+      return { ch: r.ch, key: r.key, seatNum: seat };
+    } catch (e) {
+      errors.push(e.message);
+      if (e.message === 'seat_taken') { /* 该座已被别人占，跳过继续试下一座 */ }
+      else if (e.message === 'no_name') throw e;
+      else { /* bad_password，继续下一座 */ }
+    }
+  }
+  throw new Error('bad_password');
+}
+
+// ====== 消息密钥：全站固定种子派生（所有登录者共享同一把密钥，历史互通） ======
+// 固定种子写死在代码里，服务器不存；不随口令/名字变化，任何口令登录都能解历史。
+const MSG_SALT = new TextEncoder().encode('chat2-msgkey-v2-fixed');
+const MSG_SEED = 'fx7q2m9k4p8d1w5t';   // 全站共享消息密钥种子
+async function deriveMsgKey() {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(MSG_SEED), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: MSG_SALT, iterations: 600000, hash: 'SHA-256' },
+    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+
+
+// ====== 消息加解密（AES-GCM，IV 每次随机，拼在密文前） ======
+async function encMsg(key, text) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(text)));
+  const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12);
+  return b64enc(out);
+}
+async function decMsg(key, b64) {
+  try {
+    const raw = b64dec(b64);
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: raw.subarray(0, 12) }, key, raw.subarray(12));
+    return new TextDecoder().decode(pt);
+  } catch { return '[无法解密]'; }
+}
+
+// ====== 十剑占位条（未登录显示【第N龙】暗，登录后替换为昵称并闪烁） ======
+const SEAT_NAMES = ['第一龙','第二龙','第三龙','第四龙','第五龙','第六龙','第七龙','第八龙','第九龙','第十龙'];
+// 昵称与座号融合：取昵称首字 + 龙的序号汉字（如 第九龙 + "爸爸" → "爸九龙"）
+const CN_NUM = ['一','二','三','四','五','六','七','八','九','十'];
+function fusionLabel(name, seat) {
+  const first = (name || '').slice(0, 1);
+  const idx = (seat >= 1 && seat <= 10) ? CN_NUM[seat - 1] : '';
+  return first + idx + '龙';
+}
+const seatsBarEl = document.getElementById('seatsBar');
+let seatState = {};   // { seatNum: name }
+let mySeatNum = null;
+
+function renderSeats() {
+  let html = '';
+  for (let i = 1; i <= 10; i++) {
+    const who = seatState[i];
+    const label = who ? fusionLabel(who, i) : SEAT_NAMES[i-1];
+    const cls = who ? (i === mySeatNum ? ' occupied mine' : ' occupied') : '';
+    html += '<span class="seat-chip' + cls + '">' + escapeHtml(label) + '</span>';
+  }
+  seatsBarEl.innerHTML = html;
+}
+
+// ====== 应用逻辑 ======
+// 焚毁基线：名字 -> 最近一次退出（含刷新/断线）的时刻。登录/渲染消息时取最高水位线，
+// 保证“退出即焚”在刷新场景同样生效。
+const BURN_KEY = 'chat2_burn_baseline';
+function getBurnMap() { try { return JSON.parse(localStorage.getItem(BURN_KEY)) || {}; } catch { return {}; } }
+function recordBurnBaseline(name) {
+  const m = getBurnMap(); m[name] = Date.now();
+  try { localStorage.setItem(BURN_KEY, JSON.stringify(m)); } catch (e) {}
+}
+function getSince(name) { return Number(getBurnMap()[name]) || 0; }
+let ws, sessionKey = null, myName = null, isMaster = false;
+let lastRenderMax = 0;   // 本地已渲染过的最大消息时间戳（防止刷新后已读数漏回）
+// 身份只由本次登录决定：不持久化名字，退出即清零
+const nameInput = document.getElementById('loginName');
+const passInput = document.getElementById('loginPass');
+const loginBtn = document.getElementById('loginBtn');
+const loginErr = document.getElementById('loginErr');
+const loginOverlay = document.getElementById('loginOverlay');
+function hideLogin() {
+  loginOverlay.classList.add('fading');
+  setTimeout(() => { loginOverlay.classList.add('hidden'); loginOverlay.classList.remove('fading'); updateEmptyHint(); }, 700);
+}
+function showLoginErr(t) {
+  loginErr.textContent = t;
+  const card = document.getElementById('loginCard');
+  card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+  setTimeout(() => card.classList.remove('shake'), 500);
+}
+
+function wsUrl() {
+  const proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+  return proto + location.host;
+}
+
+const msgsEl = document.getElementById('msgs');
+const statusEl = document.getElementById('status');
+const inputEl = document.getElementById('input');
+const emptyHint = document.getElementById('emptyHint');
+function setStatus(t, kind) {
+  statusEl.textContent = t;
+  statusEl.className = kind || '';
+}
+function updateEmptyHint() {
+  if (!emptyHint) return;
+  const has = msgsEl.querySelector('.msg');
+  emptyHint.classList.toggle('show', !has && loginOverlay.classList.contains('hidden'));
+}
+
+async function doLogin() {
+  const name = (nameInput.value || '').trim();
+  const pw = passInput.value || '';
+  if (!name) { showLoginErr('请输入名字'); return; }
+  if (!pw) { showLoginErr('请输入口令'); return; }
+  myName = name.slice(0, 20);
+  loginBtn.disabled = true;
+  loginBtn.textContent = '登录中...';
+  setStatus('正在登录', '');
+  try {
+    const r = await srpClient(name, pw);
+    ws = r.ch;
+    isMaster = !!r.isMaster;
+    mySeatNum = r.seatNum || null;
+    renderSeats();
+    setStatus('生成密钥', '');
+    sessionKey = await deriveMsgKey();
+    hideLogin();
+    // 身份与口令纯内存，不做任何持久化；断线/刷新即需重新登录
+    try { sessionStorage.removeItem('pw_cache'); } catch (e) {}
+    try { localStorage.removeItem('name'); } catch (e) {}
+    onConnected();
+  } catch (err) {
+    loginBtn.disabled = false;
+    loginBtn.textContent = '进入';
+    passInput.value = '';
+    const msg = err.message;
+    const friendly = msg === 'bad_password' ? '口令错误'
+      : msg === 'seat_taken' ? '该座已被占用'
+      : msg === 'no_name' ? '请输入名字'
+      : msg === 'bad_seat' ? '座位号无效'
+      : msg === 'no_preset' ? '该座未配置'
+      : msg === 'timeout' ? '连接超时'
+      : msg === 'conn' ? '连接失败'
+      : (msg || '登录失败');
+    showLoginErr(friendly);
+    setStatus(friendly, 'err');
+  }
+}
+
+
+function logout() {
+  // 清除身份，下次登录全新干净身份（口令本就只在内存，未持久化）
+  try { sessionStorage.removeItem('pw_cache'); } catch (e) {}
+  try { localStorage.removeItem('name'); } catch (e) {}
+  if (!isMaster && myName) { recordBurnBaseline(myName); }
+  sessionKey = null;
+  myName = null;
+  isMaster = false;
+  mySeatNum = null;
+  seatState = {};
+  renderSeats();
+  try { if (ws && ws.readyState === 1) ws.close(); } catch (e) {}
+  // 清空消息区（相当于执行了一遍清除聊天记录）
+  msgsEl.innerHTML = '';
+  // 清空输入框并回到登录窗
+  nameInput.value = '';
+  passInput.value = '';
+  loginErr.textContent = '';
+  document.getElementById('logoutBtn').style.display = 'none';
+  loginOverlay.classList.remove('hidden'); loginOverlay.classList.remove('fading');
+  passInput.focus();
+}
+
+function onConnected() {
+  setStatus('风信已通', 'ok');
+  // 阅后即焚：普通座登录即清空本地消息区，只加载上次退出之后的新消息；master 不清、拉全量
+  msgsEl.innerHTML = '';
+  let since = 0;
+  if (!isMaster) {
+    since = Math.max(getSince(myName), lastRenderMax);
+  }
+  ws.send(JSON.stringify({ type: 'login', name: myName, since }));
+
+  ws.onerror = () => { setStatus('连接出错', 'err'); };
+  ws.onclose = () => {
+    setStatus('连接已断开', 'err');
+    sessionKey = null;
+    // 刷新/断线也算退出：记录焚毁基线，下次登录只拉这之后的新消息（退出即清）
+    if (!isMaster && myName) {
+      recordBurnBaseline(myName);
+    }
+    document.getElementById('logoutBtn').style.display = 'none';
+    loginOverlay.classList.remove('hidden');
+    passInput.value = '';
+    passInput.focus();
+  };
+
+  ws.onmessage = async (e) => {
+    const m = JSON.parse(e.data);
+    if (m.type === 'history') {
+      for (const r of (m.messages || [])) {
+        const text = m.encrypted ? await decMsg(sessionKey, r.etext) : r.text;
+        addMsg(r.from, text, r.time, false);
+        if (r.time > lastRenderMax) lastRenderMax = r.time;
+      }
+      scrollBottom();
+    } else if (m.type === 'msg') {
+      const text = await decMsg(sessionKey, m.text);
+      if (m.time > lastRenderMax) lastRenderMax = m.time;
+      addMsg(m.from, text, m.time, true);
+    } else if (m.type === 'online') { setStatus(m.name + ' 在线', 'ok'); }
+    else if (m.type === 'offline') { setStatus(m.name + ' 离线', ''); }
+    else if (m.type === 'seats') { seatState = m.seats || {}; renderSeats(); }
+    else if (m.type === 'seat_update') {
+      if (m.seat) { if (m.name) seatState[m.seat] = m.name; else delete seatState[m.seat]; }
+      renderSeats();
+    }
+  };
+}
+
+let lastScroll = 0;
+function scrollBottom() { msgsEl.scrollTop = msgsEl.scrollHeight; }
+
+function addMsg(from, text, time, scroll) {
+  const mine = from === myName;
+  const d = new Date(time);
+  const hhmm = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  const el = document.createElement('div');
+  el.className = 'msg' + (mine ? ' me' : '');
+  el.innerHTML = '<div><div class="sender-meta">' + escapeHtml(from) + ' :: ' + hhmm + '</div><div class="bubble"></div></div>';
+  el.querySelector('.bubble').textContent = text;
+  msgsEl.appendChild(el);
+  if (emptyHint) emptyHint.classList.remove('show');
+  if (scroll && msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 120) scrollBottom();
+}
+// 消息格式化交给 CSS 自动排版（按气泡宽度折行），不手动插换行
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+async function send() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  if (!sessionKey) { setStatus('未登录', 'err'); return; }
+  if (!ws || ws.readyState !== 1) { setStatus('连接已断开，请重新登录', 'err'); return; }
+  try {
+    const ct = await encMsg(sessionKey, text);
+    ws.send(JSON.stringify({ type: 'msg', text: ct }));
+    inputEl.value = '';
+  } catch (e) {
+    setStatus('发送失败:' + e.message, 'err');
+  }
+}
+
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+loadParams().catch(() => { });
+
+// 流萤光尘：底部缓缓上浮的光点，登录页与主界面共用
+(function motes() {
+  const box = document.getElementById('motes');
+  if (!box) return;
+  const N = 14;
+  for (let i = 0; i < N; i++) {
+    const s = document.createElement('i');
+    s.style.left = (Math.random() * 100) + '%';
+    s.style.animationDuration = (14 + Math.random() * 18) + 's';
+    s.style.animationDelay = (-Math.random() * 24) + 's';
+    const sz = 1.5 + Math.random() * 2.2;
+    s.style.width = s.style.height = sz.toFixed(1) + 'px';
+    s.style.opacity = (0.35 + Math.random() * 0.5).toFixed(2);
+    box.appendChild(s);
+  }
+})();
+
+// 登录按钮绑定（放在所有函数定义之后，确保一定执行）
+loginBtn.addEventListener('click', doLogin);
+[nameInput, passInput].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
+nameInput.value = '';   // 身份不记忆
+passInput.focus();
+renderSeats();   // 初始渲染十剑占位
+</script>
+</body>
+</html>
