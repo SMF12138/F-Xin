@@ -316,8 +316,8 @@ footer {
 /* ═══════ 登录帷幕 ═══════ */
 #loginOverlay {
   position: fixed; inset: 0; z-index: 50;
-  background: rgba(3, 7, 8, 0.72);
-  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  background: rgba(3, 7, 8, 0.10);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
   display: flex; align-items: center; justify-content: center;
   overflow-y: auto; overscroll-behavior: contain;
   transition: opacity 0.7s ease;
@@ -524,7 +524,8 @@ footer {
 .login-card {
   width: clamp(280px, 86vw, 420px);
   background-clip: padding-box;
-  background: linear-gradient(170deg, rgba(12, 20, 22, 0.97), rgba(8, 13, 15, 0.97));
+  background: linear-gradient(170deg, rgba(12, 20, 22, 0.62), rgba(8, 13, 15, 0.52));
+  -webkit-backdrop-filter: blur(7px) saturate(1.06); backdrop-filter: blur(7px) saturate(1.06);
   border: 1px solid rgba(210,180,140,0.14); border-radius: 4px;
   padding: 32px 30px 28px;
   box-shadow: 0 24px 60px rgba(0,0,0,0.55), 0 0 50px rgba(210,180,140,0.03), inset 0 1px 0 rgba(235,225,205,0.05);
