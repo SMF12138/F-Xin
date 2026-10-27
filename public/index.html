@@ -429,6 +429,40 @@ footer {
 .login-title .tcol i:nth-child(7) { color: #b06cff; }
 
 /* 走完这一趟只占 8.5%，约 1.1 秒；其余时间整行纯白 */
+
+/* 银光层：和彩光同一层文字、被同一条斜光带裁在笔画内 -> 只会包在彩光外面，不跑到字外 */
+.login-title .tsilver {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  font: inherit; letter-spacing: inherit; padding-left: inherit;
+  line-height: inherit; text-align: center; white-space: nowrap;
+  display: block;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-mask-image: linear-gradient(122deg,
+    rgba(0,0,0,0) 47.3%,
+    rgba(0,0,0,.10) 48.2%,
+    rgba(0,0,0,.42) 49.0%,
+    rgba(0,0,0,.58) 49.7%, rgba(0,0,0,.58) 50.3%,
+    rgba(0,0,0,.42) 51.0%,
+    rgba(0,0,0,.10) 51.8%,
+    rgba(0,0,0,0) 52.7%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(122deg,
+    rgba(0,0,0,0) 47.3%,
+    rgba(0,0,0,.10) 48.2%,
+    rgba(0,0,0,.42) 49.0%,
+    rgba(0,0,0,.62) 49.6%, rgba(0,0,0,.62) 50.4%,
+    rgba(0,0,0,.42) 51.0%,
+    rgba(0,0,0,.10) 51.8%,
+    rgba(0,0,0,0) 52.7%, rgba(0,0,0,0) 100%);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 92% 0; mask-position: 92% 0;
+  text-shadow: 0 0 3px rgba(255,255,255,1), 0 0 9px rgba(255,253,246,.95), 0 0 20px rgba(255,246,222,.7), 0 0 34px rgba(255,240,206,.35);
+  opacity: 0;
+  animation: silverFlash 8s linear 1.6s 1 forwards;
+}
+
 @keyframes colorFlash {
   0%    { opacity: 0;  -webkit-mask-position: 92% 0; mask-position: 92% 0; }
   20%   { opacity: 0;  -webkit-mask-position: 92% 0; mask-position: 92% 0; }
@@ -437,6 +471,17 @@ footer {
   58%   { opacity: .72;-webkit-mask-position: 2% 0;  mask-position: 2% 0; }
   74%   { opacity: .34;-webkit-mask-position: -5% 0; mask-position: -5% 0; }
   90%   { opacity: .08;-webkit-mask-position: -10% 0;mask-position: -10% 0; }
+  100%  { opacity: 0;  -webkit-mask-position: -12% 0;mask-position: -12% 0; }
+}
+@keyframes silverFlash {
+  0%    { opacity: 0;  -webkit-mask-position: 92% 0; mask-position: 92% 0; }
+  20%   { opacity: 0;  -webkit-mask-position: 92% 0; mask-position: 92% 0; }
+  22%   { opacity: .95; -webkit-mask-position: 90% 0; mask-position: 90% 0; }
+  46%   { opacity: .95; -webkit-mask-position: 10% 0; mask-position: 10% 0; }
+  56%   { opacity: .60; -webkit-mask-position: 2% 0;  mask-position: 2% 0; }
+  70%   { opacity: .26; -webkit-mask-position: -5% 0; mask-position: -5% 0; }
+  84%   { opacity: .07; -webkit-mask-position: -10% 0;mask-position: -10% 0; }
+  96%   { opacity: 0;  -webkit-mask-position: -12% 0;mask-position: -12% 0; }
   100%  { opacity: 0;  -webkit-mask-position: -12% 0;mask-position: -12% 0; }
 }
 @keyframes titleIn {
@@ -703,7 +748,7 @@ footer {
       <div class="frame2"></div>
       <div class="glyph">信</div>
     </div>
-    <div class="login-title" aria-label="天地一家奶龙盟">天地一家奶龙盟<span class="tcol" aria-hidden="true"><i>天</i><i>地</i><i>一</i><i>家</i><i>奶</i><i>龙</i><i>盟</i></span></div>
+    <div class="login-title" aria-label="天地一家奶龙盟">天地一家奶龙盟<span class="tcol" aria-hidden="true"><i>天</i><i>地</i><i>一</i><i>家</i><i>奶</i><i>龙</i><i>盟</i></span><span class="tsilver" aria-hidden="true">天地一家奶龙盟</span></div>
     <div class="login-seal-sub">风信子屋<span style="display:inline-block;width:2.2em"></span>恭迎入席</div>
     <div class="login-divider"></div>
     <div class="login-card" id="loginCard">
@@ -1401,15 +1446,18 @@ renderSeats();   // 初始渲染十剑占位
   }, 11000);
 })();
 
-/* 标题彩光：8 秒一个周期，其中 2 秒扫完整行 */
+/* 标题彩光 + 银光：8 秒一个周期，其中 2 秒扫完整行 */
 (function(){
   var col = document.querySelector('.login-title .tcol');
+  var sil = document.querySelector('.login-title .tsilver');
   if(!col) return;
-  var AN = 'colorFlash 8s linear 1.6s 1 forwards';
+  var AC = 'colorFlash 8s linear 1.6s 1 forwards';
+  var AS = 'silverFlash 8s linear 1.6s 1 forwards';
   function flash(){
     col.style.animation = 'none';
     void col.offsetWidth;
-    col.style.animation = AN;
+    col.style.animation = AC;
+    if(sil){ sil.style.animation = 'none'; void sil.offsetWidth; sil.style.animation = AS; }
   }
   flash();
   setInterval(flash, 8000);
