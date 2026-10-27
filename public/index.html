@@ -499,6 +499,22 @@ footer {
 }
 .login-foot .gold-line { color: rgba(216,179,106,0.5); font-size: 9px; letter-spacing: 6px; }
 
+/* 联语轮转：色调与墨渗转场 */
+.login-seal-sub, .login-foot {
+  transition: opacity .85s cubic-bezier(.4,0,.2,1), filter .85s cubic-bezier(.4,0,.2,1),
+              letter-spacing .85s cubic-bezier(.4,0,.2,1), color .85s ease;
+  will-change: opacity, filter, letter-spacing;
+}
+.login-seal-sub.tone-gold { color: rgba(201,168,106,0.8); }
+.login-seal-sub.tone-blue { color: rgba(141,181,205,0.92); }
+.login-foot.tone-plain { color: #93a89b; }
+.login-foot.tone-blue { color: rgba(126,163,185,0.8); }
+.login-seal-sub.veil, .login-foot.veil {
+  opacity: 0; filter: blur(4px); letter-spacing: 9px;
+}
+.login-foot.veil { letter-spacing: 12px; }
+.login-seal-sub .sep, .login-foot .sep { color: rgba(216,179,106,0.55); margin: 0 6px; }
+
 /* ── 移动端 ── */
 @media (max-height: 780px) {
   .sigil-seal { width: 84px; height: 84px; margin-bottom: 20px; }
@@ -1071,32 +1087,43 @@ nameInput.value = '';   // 身份不记忆
 passInput.focus();
 renderSeats();   // 初始渲染十剑占位
 
-// 联语轮转：默认（风信子屋/入席即盟）↔ 15:22 版联语，位置不动只换字
+// 联语轮转：默认「风信子屋 · 恭迎入席」保持金色，其余古句轮转用石青蓝，墨渗淡入淡出
 (function () {
   const subEl = document.querySelector('.login-seal-sub');
   const footEl = document.querySelector('.login-foot');
   if (!subEl || !footEl) return;
-  const SEP = '<span style="color:rgba(216,179,106,0.6);margin:0 6px">\u2756</span>';
+  const SEP = '<span class="sep">\u2756</span>';
   const DOT = '<span class="gold-line">\u3000\u00b7\u3000</span>';
   const sets = [
     { sub: '\u98ce\u4fe1\u5b50\u5c4b<span style="display:inline-block;width:2.2em"></span>\u606d\u8fce\u5165\u5e2d',
-      foot: '\u5165\u5e2d\u5373\u76df' + DOT + '\u9000\u5e2d\u5373\u711a' },
+      foot: '\u5165\u5e2d\u5373\u76df' + DOT + '\u9000\u5e2d\u5373\u711a', tone: 'gold' },
     { sub: '\u5c71\u6cb3\u4e0d\u8db3\u91cd' + SEP + '\u91cd\u5728\u9047\u77e5\u5df1',
-      foot: '\u6709\u670b\u81ea\u8fdc\u65b9\u6765' + DOT + '\u4e0d\u4ea6\u8bf4\u4e4e' }
+      foot: '\u6709\u670b\u81ea\u8fdc\u65b9\u6765' + DOT + '\u4e0d\u4ea6\u8bf4\u4e4e', tone: 'blue' },
+    { sub: '\u6d77\u5185\u5b58\u77e5\u5df1' + SEP + '\u5929\u6daf\u82e5\u6bd4\u90bb',
+      foot: '\u76f8\u77e5\u65e0\u8fdc\u8fd1' + DOT + '\u4e07\u91cc\u5c1a\u4e3a\u90bb', tone: 'blue' },
+    { sub: '\u4e00\u7eb8\u98ce\u4fe1\u8fc7' + SEP + '\u89c1\u5b57\u5982\u89c1\u9762',
+      foot: '\u4e91\u4e2d\u8c01\u5bc4\u9526\u4e66\u6765' + DOT + '\u96c1\u5b57\u56de\u65f6', tone: 'blue' },
+    { sub: '\u6d6e\u4e91\u6e38\u5b50\u610f' + SEP + '\u843d\u65e5\u6545\u4eba\u60c5',
+      foot: '\u6d1b\u9633\u4eb2\u53cb\u5982\u76f8\u95ee' + DOT + '\u4e00\u7247\u51b0\u5fc3', tone: 'blue' },
+    { sub: '\u541b\u5b50\u4e4b\u4ea4\u6de1\u5982\u6c34' + SEP + '\u5c81\u4e45\u60c5\u6108\u771f',
+      foot: '\u4e0e\u541b\u521d\u76f8\u8bc6' + DOT + '\u72b9\u5982\u6545\u4eba\u5f52', tone: 'blue' }
   ];
-  [subEl, footEl].forEach(function (el) {
-    el.style.transition = 'opacity .55s ease';
-  });
+  const paint = function (el, html, tone) {
+    el.innerHTML = html;
+    el.classList.remove('tone-gold', 'tone-blue', 'tone-plain');
+    el.classList.add('tone-' + tone);
+  };
+  paint(subEl, sets[0].sub, 'gold');
+  paint(footEl, sets[0].foot, 'plain');
   let i = 0;
   setInterval(function () {
     i = (i + 1) % sets.length;
-    subEl.style.opacity = '0'; footEl.style.opacity = '0';
-    setTimeout(function () {
-      subEl.innerHTML = sets[i].sub;
-      footEl.innerHTML = sets[i].foot;
-      subEl.style.opacity = '1'; footEl.style.opacity = '1';
-    }, 560);
-  }, 6000);
+    const t = sets[i];
+    subEl.classList.add('veil');
+    setTimeout(function () { footEl.classList.add('veil'); }, 130);
+    setTimeout(function () { paint(subEl, t.sub, t.tone); subEl.classList.remove('veil'); }, 880);
+    setTimeout(function () { paint(footEl, i === 0 ? t.foot : t.foot, i === 0 ? 'plain' : t.tone); footEl.classList.remove('veil'); }, 1010);
+  }, 9500);
 })();
 </script>
 </body>
