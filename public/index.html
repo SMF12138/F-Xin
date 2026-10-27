@@ -499,20 +499,24 @@ footer {
 }
 .login-foot .gold-line { color: rgba(216,179,106,0.5); font-size: 9px; letter-spacing: 6px; }
 
-/* 联语轮转：色调与墨渗转场 */
-.login-seal-sub, .login-foot {
-  transition: opacity .85s cubic-bezier(.4,0,.2,1), filter .85s cubic-bezier(.4,0,.2,1),
-              letter-spacing .85s cubic-bezier(.4,0,.2,1), color .85s ease;
-  will-change: opacity, filter, letter-spacing;
+/* 联语轮转：奶油般滑开（新旧重叠，错峰滑移 + 化焦） */
+.login-seal-sub, .login-foot { position: relative; }
+.login-seal-sub .rot, .login-foot .rot { display: inline-block; white-space: pre; }
+.login-seal-sub .rot-old, .login-foot .rot-old {
+  position: absolute; left: 0; right: 0; top: 0;
+  display: block; white-space: pre; pointer-events: none;
 }
+.login-seal-sub .rot .ch, .login-foot .rot .ch,
+.login-seal-sub .rot-old .ch, .login-foot .rot-old .ch {
+  display: inline-block; white-space: pre;
+  will-change: opacity, transform, filter;
+  backface-visibility: hidden;
+}
+.login-seal-sub, .login-foot { transition: color 1.4s ease; }
 .login-seal-sub.tone-gold { color: rgba(201,168,106,0.8); }
 .login-seal-sub.tone-blue { color: rgba(141,181,205,0.92); }
 .login-foot.tone-plain { color: rgba(201,168,106,0.72); }
 .login-foot.tone-blue { color: rgba(126,163,185,0.8); }
-.login-seal-sub.veil, .login-foot.veil {
-  opacity: 0; filter: blur(4px); letter-spacing: 9px;
-}
-.login-foot.veil { letter-spacing: 12px; }
 .login-seal-sub .sep, .login-foot .sep { color: rgba(216,179,106,0.55); margin: 0 6px; }
 
 /* ── 移动端 ── */
@@ -1108,22 +1112,96 @@ renderSeats();   // 初始渲染十剑占位
     { sub: '\u541b\u5b50\u4e4b\u4ea4\u6de1\u5982\u6c34' + SEP + '\u5c81\u4e45\u60c5\u6108\u771f',
       foot: '\u4e0e\u541b\u521d\u8bc6\u5982\u6545' + DOT + '\u5b9b\u82e5\u6545\u4eba', tone: 'blue' }
   ];
+  const REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const split = function (html) {
+    const tmp = document.createElement('span');
+    tmp.innerHTML = html;
+    (function walk(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          String(n.nodeValue).split('').forEach(function (c) {
+            if (c === '') return;
+            const w = document.createElement('span');
+            w.className = 'ch';
+            w.textContent = c === ' ' ? '\u00a0' : c;
+            frag.appendChild(w);
+          });
+          node.replaceChild(frag, n);
+        } else if (n.nodeType === 1) { walk(n); }
+      });
+    })(tmp);
+    return tmp.innerHTML;
+  };
+  const ensureRot = function (el) {
+    let r = el.querySelector(':scope > .rot');
+    if (!r) {
+      const seed = el.innerHTML;
+      el.innerHTML = '';
+      r = document.createElement('span');
+      r.className = 'rot';
+      r.innerHTML = seed;
+      el.appendChild(r);
+    }
+    return r;
+  };
   const paint = function (el, html, tone) {
-    el.innerHTML = html;
+    const r = ensureRot(el);
+    r.innerHTML = split(html);
     el.classList.remove('tone-gold', 'tone-blue', 'tone-plain');
     el.classList.add('tone-' + tone);
   };
+  const CREAM_IN  = 'cubic-bezier(.16,1,.3,1)';     // 长尾减速：落笔即定
+  const CREAM_OUT = 'cubic-bezier(.55,.06,.68,.19)'; // 起步绵、离场加速
+
+  const melt = function (el, html, tone, delay) {
+    setTimeout(function () {
+      const r = ensureRot(el);
+      if (REDUCE) { paint(el, html, tone); return; }
+
+      const ghost = document.createElement('span');
+      ghost.className = 'rot-old';
+      ghost.innerHTML = r.innerHTML;
+      el.appendChild(ghost);
+
+      const oldChars = Array.prototype.slice.call(ghost.querySelectorAll('.ch'));
+      oldChars.forEach(function (c, i) {
+        c.animate(
+          [{ opacity: 1, filter: 'blur(0px)', transform: 'translateY(0)' },
+           { opacity: 0, filter: 'blur(3.2px)', transform: 'translateY(-9px)' }],
+          { duration: 1150, delay: i * 30, easing: CREAM_OUT, fill: 'forwards' }
+        );
+      });
+
+      // 与旧句重叠：520ms 后新句即开始渗入
+      setTimeout(function () {
+        paint(el, html, tone);
+        const neu = Array.prototype.slice.call(r.querySelectorAll('.ch'));
+        neu.forEach(function (c, i) {
+          c.animate(
+            [{ opacity: 0, filter: 'blur(6px)', transform: 'translateY(22px) scale(.972)' },
+             { opacity: 1, filter: 'blur(0px)', transform: 'translateY(0) scale(1)' }],
+            { duration: 2000, delay: i * 55, easing: CREAM_IN, fill: 'both' }
+          );
+        });
+      }, 520);
+
+      setTimeout(function () {
+        if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+      }, 1150 + oldChars.length * 30 + 120);
+    }, delay);
+  };
+
   paint(subEl, sets[0].sub, 'gold');
   paint(footEl, sets[0].foot, 'plain');
+
   let i = 0;
   setInterval(function () {
     i = (i + 1) % sets.length;
     const t = sets[i];
-    subEl.classList.add('veil');
-    setTimeout(function () { footEl.classList.add('veil'); }, 130);
-    setTimeout(function () { paint(subEl, t.sub, t.tone); subEl.classList.remove('veil'); }, 880);
-    setTimeout(function () { paint(footEl, i === 0 ? t.foot : t.foot, i === 0 ? 'plain' : t.tone); footEl.classList.remove('veil'); }, 1010);
-  }, 9500);
+    melt(subEl, t.sub, t.tone, 0);
+    melt(footEl, t.foot, i === 0 ? 'plain' : t.tone, 190);
+  }, 11000);
 })();
 </script>
 </body>
