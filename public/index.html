@@ -370,16 +370,55 @@ footer {
   font-size: 27px; font-weight: 700;
   letter-spacing: 6px; padding-left: 6px;
   text-align: center;
+  position: relative;
   animation: stageIn 1s 0.12s cubic-bezier(0.22,1,0.36,1) both;
 }
+/* 七字固定色：赤橙黄绿青蓝紫 */
 .login-title .tt {
   display: inline-block;
-  background-image: linear-gradient(180deg, #f2eee2 20%, #c3bfb0 85%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
-  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.7)) drop-shadow(0 4px 14px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.72)) drop-shadow(0 3px 10px rgba(0,0,0,0.55));
   animation: titleRise .9s cubic-bezier(.22,1,.36,1) both;
 }
+.login-title .tt.o0 { background-image: linear-gradient(178deg, #ff8d72 8%, #e0402c 92%); }
+.login-title .tt.o1 { background-image: linear-gradient(178deg, #ffb066 8%, #e2711d 92%); }
+.login-title .tt.o2 { background-image: linear-gradient(178deg, #f9dc6a 8%, #d9a916 92%); }
+.login-title .tt.o3 { background-image: linear-gradient(178deg, #9ade82 8%, #4a9a35 92%); }
+.login-title .tt.o4 { background-image: linear-gradient(178deg, #7ad9cf 8%, #2b8f8a 92%); }
+.login-title .tt.o5 { background-image: linear-gradient(178deg, #8fb4ec 8%, #3a63b0 92%); }
+.login-title .tt.o6 { background-image: linear-gradient(178deg, #c59ae8 8%, #8144b8 92%); }
+
+/* 一道白光条自左向右扫过整行标题 */
+.login-title::after {
+  content: ""; position: absolute; top: -22%; bottom: -22%; width: 46%;
+  left: -60%;
+  pointer-events: none;
+  background: linear-gradient(100deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.05) 26%,
+    rgba(255,255,255,0.62) 48%,
+    rgba(255,255,255,0.95) 52%,
+    rgba(255,255,255,0.62) 56%,
+    rgba(255,255,255,0.05) 74%,
+    rgba(255,255,255,0) 100%);
+  filter: blur(5px);
+  mix-blend-mode: screen;
+  animation: titleSweep 4.2s cubic-bezier(.42,0,.32,1) 1.5s infinite;
+}
+@keyframes titleSweep {
+  0%   { left: -60%; opacity: 0; }
+  6%   { opacity: 1; }
+  46%  { left: 118%; opacity: 1; }
+  52%  { left: 118%; opacity: 0; }
+  100% { left: 118%; opacity: 0; }
+}
+@keyframes titleRise {
+  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+
+/* 标题：一道彩虹光自左向右掠过，每字依次接过色光后回落 */
 @keyframes titleRise {
   from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
   to   { opacity: 1; transform: none; filter: blur(0); }
@@ -684,7 +723,7 @@ footer {
       <div class="frame2"></div>
       <div class="glyph">信</div>
     </div>
-    <div class="login-title" aria-label="天地一家奶龙盟"><span class="tt o0 glow">天</span><span class="tt o1 glow">地</span><span class="tt o2 glow">一</span><span class="tt o3 glow">家</span><span class="tt o4 glow">奶</span><span class="tt o5 glow">龙</span><span class="tt o6 glow">盟</span></div>
+    <div class="login-title" aria-label="天地一家奶龙盟"><span class="tt o0">天</span><span class="tt o1">地</span><span class="tt o2">一</span><span class="tt o3">家</span><span class="tt o4">奶</span><span class="tt o5">龙</span><span class="tt o6">盟</span></div>
     <div class="login-seal-sub">风信子屋<span style="display:inline-block;width:2.2em"></span>恭迎入席</div>
     <div class="login-divider"></div>
     <div class="login-card" id="loginCard">
