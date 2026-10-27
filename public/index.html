@@ -519,6 +519,32 @@ footer {
 .login-foot.tone-blue { color: rgba(126,163,185,0.8); }
 .login-seal-sub .sep, .login-foot .sep { color: rgba(216,179,106,0.55); margin: 0 6px; }
 
+/* 登录页专属：宣纸色系光尘（叠在帷幕之上，暖白微金，与墨青朱红相和） */
+.login-motes { position: fixed; inset: 0; z-index: 52; pointer-events: none; overflow: hidden; }
+.login-motes i {
+  position: absolute; bottom: -10px; border-radius: 50%;
+  background: rgba(238,230,206,0.9);
+  box-shadow: 0 0 10px 2px rgba(214,196,158,0.45), 0 0 22px 6px rgba(180,205,190,0.16);
+  opacity: 0;
+  animation: riseMote linear infinite;
+}
+.login-motes i.warm {
+  background: rgba(246,224,186,0.85);
+  box-shadow: 0 0 12px 2px rgba(226,186,120,0.42), 0 0 26px 8px rgba(200,160,100,0.14);
+}
+@keyframes riseMote {
+  0%   { transform: translate3d(0,0,0) scale(.9); opacity: 0; }
+  10%  { opacity: 1; }
+  55%  { opacity: .72; }
+  100% { transform: translate3d(var(--dx, 4vw), -100vh, 0) scale(1.06); opacity: 0; }
+}
+#loginOverlay.fading ~ .login-motes, #loginOverlay.hidden ~ .login-motes {
+  opacity: 0; transition: opacity .8s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-motes i { animation-duration: 40s !important; }
+}
+
 /* ── 移动端 ── */
 @media (max-height: 780px) {
   .sigil-seal { width: 84px; height: 84px; margin-bottom: 20px; }
@@ -572,6 +598,8 @@ footer {
 <div class="bg-watermark">信</div>
 <div class="motes" id="motes"></div>
 <div class="bg-scan"></div>
+
+<div class="login-motes" id="loginMotes" aria-hidden="true"></div>
 
 <!-- 登录帷幕 -->
 <div id="loginOverlay">
@@ -1081,6 +1109,39 @@ loadParams().catch(() => { });
     s.style.width = s.style.height = sz.toFixed(1) + 'px';
     s.style.opacity = (0.35 + Math.random() * 0.5).toFixed(2);
     box.appendChild(s);
+  }
+})();
+
+// 登录页光尘：宣纸暖白光点，自底部缓缓上浮并微微游移
+(function loginMotes() {
+  const box = document.getElementById('loginMotes');
+  if (!box) return;
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const N = reduce ? 8 : 22;
+  for (let i = 0; i < N; i++) {
+    const s = document.createElement('i');
+    const sz = 1.4 + Math.random() * 2.6;
+    s.style.width = s.style.height = sz.toFixed(1) + 'px';
+    s.style.left = (Math.random() * 100) + '%';
+    s.style.setProperty('--dx', ((Math.random() * 2 - 1) * 9).toFixed(1) + 'vw');
+    s.style.animationDuration = (18 + Math.random() * 26).toFixed(1) + 's';
+    s.style.animationDelay = (-Math.random() * 40).toFixed(1) + 's';
+    const base = 0.35 + Math.random() * 0.55;
+    s.style.opacity = base.toFixed(2);
+    if (Math.random() < 0.3) s.classList.add('warm');
+    box.appendChild(s);
+  }
+  // 登录完成后淡出，不干扰聊天界面
+  const hide = function () { box.style.opacity = '0'; };
+  const ov = document.getElementById('loginOverlay');
+  if (ov) {
+    const mo = new MutationObserver(function () {
+      if (ov.classList.contains('hidden') || ov.classList.contains('fading')) {
+        box.style.transition = 'opacity .9s ease';
+        hide();
+      }
+    });
+    mo.observe(ov, { attributes: true, attributeFilter: ['class'] });
   }
 })();
 
