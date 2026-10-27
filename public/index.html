@@ -411,7 +411,7 @@ footer {
   -webkit-mask-position: 92% 0; mask-position: 92% 0;
   opacity: 0;
   /* 一次性：一闪即止，扫完锁在界外，不会留残色 */
-  animation: colorFlash 13s linear 1.6s 1 forwards;
+  animation: colorFlash 20s linear 1.6s 1 forwards;
 }
 .login-title .tcol i {
   font-style: normal; display: inline-block;
@@ -459,27 +459,27 @@ footer {
   -webkit-mask-position: 92% 0; mask-position: 92% 0;
   text-shadow: 0 0 3px rgba(255,255,255,1), 0 0 9px rgba(255,253,246,.95), 0 0 20px rgba(255,246,222,.7), 0 0 34px rgba(255,240,206,.35);
   opacity: 0;
-  animation: silverFlash 13s linear 1.6s 1 forwards;
+  animation: silverFlash 20s linear 1.6s 1 forwards;
 }
 
 /* 走完这一趟只占 8.5%，约 1.1 秒；其余时间整行纯白 */
 @keyframes colorFlash {
   0%    { opacity: 0;  -webkit-mask-position: 92% 0; mask-position: 92% 0; }
   2%    { opacity: 1;  -webkit-mask-position: 90% 0; mask-position: 90% 0; }
-  18%   { opacity: 1;  -webkit-mask-position: 16% 0; mask-position: 16% 0; }
-  26%   { opacity: .82;-webkit-mask-position: 2% 0;  mask-position: 2% 0; }
-  33%   { opacity: .46;-webkit-mask-position: -4% 0; mask-position: -4% 0; }
-  40%   { opacity: .16;-webkit-mask-position: -9% 0; mask-position: -9% 0; }
-  47%   { opacity: 0;  -webkit-mask-position: -14% 0;mask-position: -14% 0; }
+  14%   { opacity: 1;  -webkit-mask-position: 16% 0; mask-position: 16% 0; }
+  20%   { opacity: .82;-webkit-mask-position: 2% 0;  mask-position: 2% 0; }
+  26%   { opacity: .46;-webkit-mask-position: -4% 0; mask-position: -4% 0; }
+  32%   { opacity: .16;-webkit-mask-position: -9% 0; mask-position: -9% 0; }
+  38%   { opacity: 0;  -webkit-mask-position: -14% 0;mask-position: -14% 0; }
   100%  { opacity: 0;  -webkit-mask-position: -14% 0;mask-position: -14% 0; }
 }
 @keyframes silverFlash {
   0%    { opacity: 0; -webkit-mask-position: 92% 0; mask-position: 92% 0; }
   2%    { opacity: .98; -webkit-mask-position: 90% 0; mask-position: 90% 0; }
-  18%   { opacity: .98; -webkit-mask-position: 16% 0; mask-position: 16% 0; }
-  24%   { opacity: .60; -webkit-mask-position: 3% 0; mask-position: 3% 0; }
-  30%   { opacity: .22; -webkit-mask-position: -5% 0; mask-position: -5% 0; }
-  36%   { opacity: 0; -webkit-mask-position: -12% 0; mask-position: -12% 0; }
+  14%   { opacity: .98; -webkit-mask-position: 16% 0; mask-position: 16% 0; }
+  19%   { opacity: .60; -webkit-mask-position: 3% 0; mask-position: 3% 0; }
+  24%   { opacity: .22; -webkit-mask-position: -5% 0; mask-position: -5% 0; }
+  29%   { opacity: 0; -webkit-mask-position: -12% 0; mask-position: -12% 0; }
   100%  { opacity: 0; -webkit-mask-position: -12% 0; mask-position: -12% 0; }
 }
 @keyframes titleIn {
@@ -1453,8 +1453,8 @@ renderSeats();   // 初始渲染十剑占位
     [col, sil].forEach(function(el){
       if(!el) return;
       var an = el === col
-        ? 'colorFlash 13s linear 1.6s 1 forwards'
-        : 'silverFlash 13s linear 1.6s 1 forwards';
+        ? 'colorFlash 20s linear 1.6s 1 forwards'
+        : 'silverFlash 20s linear 1.6s 1 forwards';
       el.style.animation = 'none';
       void el.offsetWidth;
       el.style.animation = an;
