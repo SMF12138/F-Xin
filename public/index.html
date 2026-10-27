@@ -368,57 +368,67 @@ footer {
 .login-title {
   font-family: var(--serif);
   font-size: 27px; font-weight: 700;
+  letter-spacing: 6px; padding-left: 6px;
   text-align: center;
   animation: stageIn 1s 0.12s cubic-bezier(0.22,1,0.36,1) both;
-  display: flex; justify-content: center; align-items: baseline;
 }
 .login-title .tt {
   display: inline-block;
-  letter-spacing: 6px;
   background-image: linear-gradient(180deg, #f2eee2 20%, #c3bfb0 85%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
   filter: drop-shadow(0 1px 0 rgba(0,0,0,0.7)) drop-shadow(0 4px 14px rgba(0,0,0,0.5));
-  background-size: 100% 100%;
-  animation: titleRise .9s cubic-bezier(.22,1,.36,1) both, ttGlow 4.6s ease-in-out infinite;
+  animation: titleRise .9s cubic-bezier(.22,1,.36,1) both;
 }
-.login-title .tt:last-child { letter-spacing: 0; }
-/* 赤橙黄绿青蓝紫，每字定色；闪光为同色高光扫过 + 呼吸亮度 */
-.login-title .tt.o0 { --hue: 6;   --dl: 0s;    }
-.login-title .tt.o1 { --hue: 26;  --dl: .30s;  }
-.login-title .tt.o2 { --hue: 48;  --dl: .60s;  }
-.login-title .tt.o3 { --hue: 110; --dl: .90s;  }
-.login-title .tt.o4 { --hue: 175; --dl: 1.20s; }
-.login-title .tt.o5 { --hue: 218; --dl: 1.50s; }
-.login-title .tt.o6 { --hue: 282; --dl: 1.80s; }
 @keyframes titleRise {
-  from { opacity: 0; transform: translateY(14px) scale(.94); filter: blur(6px); }
+  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
   to   { opacity: 1; transform: none; filter: blur(0); }
 }
-@keyframes ttGlow {
-  0%, 62%, 100% {
-    background-image: linear-gradient(180deg, #efe9d9 12%, #c8c3b4 88%);
+
+/* 标题：一道彩虹光自左向右掠过，每字依次接过色光后回落 */
+.login-title .tt { --rl: 0s; }
+.login-title .tt.o0 { --rl: 0.00s; }
+.login-title .tt.o1 { --rl: 0.11s; }
+.login-title .tt.o2 { --rl: 0.22s; }
+.login-title .tt.o3 { --rl: 0.33s; }
+.login-title .tt.o4 { --rl: 0.44s; }
+.login-title .tt.o5 { --rl: 0.55s; }
+.login-title .tt.o6 { --rl: 0.66s; }
+.login-title .glow {
+  animation:
+    titleRise .9s cubic-bezier(.22,1,.36,1) both,
+    swpLit 3.4s cubic-bezier(.33,0,.2,1) var(--rl) infinite;
+}
+@keyframes swpLit {
+  0%, 100% {
+    background-image: linear-gradient(180deg, #f2eee2 20%, #c3bfb0 85%);
     filter: drop-shadow(0 1px 0 rgba(0,0,0,.7)) drop-shadow(0 4px 14px rgba(0,0,0,.5));
   }
-  74%, 86% {
-    background-image: linear-gradient(
-      160deg,
-      hsl(var(--hue) 92% 74%) 0%,
-      hsl(var(--hue) 96% 62%) 34%,
-      #fff8ea 50%,
-      hsl(var(--hue) 96% 62%) 66%,
-      hsl(var(--hue) 92% 74%) 100%);
-    background-size: 260% 100%;
-    animation-name: ttGlow, ttSweep;
+  9%, 20% {
+    background-image: linear-gradient(180deg, #ff9a7a 12%, #ffcf6a 48%, #fffdf6 88%);
     filter:
       drop-shadow(0 1px 0 rgba(0,0,0,.7))
-      drop-shadow(0 0 6px hsla(var(--hue), 96%, 62%, .55))
-      drop-shadow(0 0 18px hsla(var(--hue), 92%, 58%, .3));
+      drop-shadow(0 0 8px rgba(255,232,180,.7))
+      drop-shadow(0 0 22px rgba(255,170,110,.34));
   }
-}
-@keyframes ttSweep {
-  0%   { background-position: 140% 0; }
-  100% { background-position: -40% 0; }
+  28% {
+    background-image: linear-gradient(180deg, #ffe6a8 16%, #b8f0c8 58%, #dff4ff 92%);
+    filter:
+      drop-shadow(0 1px 0 rgba(0,0,0,.7))
+      drop-shadow(0 0 9px rgba(214,244,255,.6))
+      drop-shadow(0 0 22px rgba(140,210,240,.28));
+  }
+  36% {
+    background-image: linear-gradient(180deg, #a8d8ff 14%, #cfb0f2 58%, #ffd9ee 92%);
+    filter:
+      drop-shadow(0 1px 0 rgba(0,0,0,.7))
+      drop-shadow(0 0 9px rgba(220,200,255,.6))
+      drop-shadow(0 0 22px rgba(170,150,240,.26));
+  }
+  46% {
+    background-image: linear-gradient(180deg, #f2eee2 20%, #c3bfb0 85%);
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.7)) drop-shadow(0 4px 14px rgba(0,0,0,.5));
+  }
 }
 .login-seal-sub {
   margin-top: 10px;
@@ -547,6 +557,22 @@ footer {
 /* 联语轮转：奶油般滑开（新旧重叠，错峰滑移 + 化焦） */
 .login-seal-sub, .login-foot { position: relative; }
 .login-seal-sub .rot, .login-foot .rot { display: inline-block; white-space: pre; }
+/* 消散那一刻的白光高亮（叠在旧句上，与消散同起同落） */
+.login-seal-sub .flash, .login-foot .flash {
+  position: absolute; left: 0; right: 0; top: 0;
+  display: block; white-space: pre; pointer-events: none;
+  color: #ffffff;
+  text-shadow:
+    0 0 6px rgba(255,255,255,.95),
+    0 0 16px rgba(255,246,225,.75),
+    0 0 34px rgba(255,232,190,.42);
+  z-index: 2;
+}
+.login-seal-sub .flash .ch, .login-foot .flash .ch {
+  display: inline-block; white-space: pre;
+  will-change: opacity, filter;
+  backface-visibility: hidden;
+}
 .login-seal-sub .rot-old, .login-foot .rot-old {
   position: absolute; left: 0; right: 0; top: 0;
   display: block; white-space: pre; pointer-events: none;
@@ -610,8 +636,7 @@ footer {
   .bubble { width: 24em; font-size: 13px; }
   .seat-chip { font-size: 11px; padding: 4px 9px; letter-spacing: 1px; }
   .login-card { padding: 26px 20px 22px; border-radius: 4px; }
-  .login-title { font-size: 20px; }
-  .login-title .tt { letter-spacing: 4px; }
+  .login-title { font-size: 20px; letter-spacing: 4px; padding-left: 4px; }
   .login-poem { font-size: 11px; letter-spacing: 3px; }
   .sigil-seal { width: 88px; height: 88px; }
   .sigil-seal .glyph { font-size: 44px; }
@@ -659,7 +684,7 @@ footer {
       <div class="frame2"></div>
       <div class="glyph">信</div>
     </div>
-    <div class="login-title" aria-label="天地一家奶龙盟"><span class="tt o0">天</span><span class="tt o1">地</span><span class="tt o2">一</span><span class="tt o3">家</span><span class="tt o4">奶</span><span class="tt o5">龙</span><span class="tt o6">盟</span></div>
+    <div class="login-title" aria-label="天地一家奶龙盟"><span class="tt o0 glow">天</span><span class="tt o1 glow">地</span><span class="tt o2 glow">一</span><span class="tt o3 glow">家</span><span class="tt o4 glow">奶</span><span class="tt o5 glow">龙</span><span class="tt o6 glow">盟</span></div>
     <div class="login-seal-sub">风信子屋<span style="display:inline-block;width:2.2em"></span>恭迎入席</div>
     <div class="login-divider"></div>
     <div class="login-card" id="loginCard">
@@ -1257,6 +1282,20 @@ renderSeats();   // 初始渲染十剑占位
     r.innerHTML = split(html);
     el.classList.remove('tone-gold', 'tone-blue', 'tone-plain');
     el.classList.add('tone-' + tone);
+    syncFlash(el, r);
+  };
+  // 白光层：与正文逐字对齐，平时透明，消散时才亮（由 melt 触发）
+  const syncFlash = function (el, rot) {
+    let f = el.querySelector(':scope > .flash');
+    if (!f) {
+      f = document.createElement('span');
+      f.className = 'flash';
+      el.appendChild(f);
+    }
+    f.innerHTML = rot.innerHTML;
+    Array.prototype.forEach.call(f.querySelectorAll('.ch'), function (c) {
+      c.style.opacity = '0';
+    });
   };
   const CREAM_IN  = 'cubic-bezier(.16,1,.3,1)';     // 长尾减速：落笔即定
   const CREAM_OUT = 'cubic-bezier(.55,.06,.68,.19)'; // 起步绵、离场加速
@@ -1280,6 +1319,9 @@ renderSeats();   // 初始渲染十剑占位
       ghost.innerHTML = r.innerHTML;
       el.appendChild(ghost);
 
+      const flash = el.querySelector(':scope > .flash');
+      const flashChars = flash ? Array.prototype.slice.call(flash.querySelectorAll('.ch')) : [];
+
       const oldChars = Array.prototype.slice.call(ghost.querySelectorAll('.ch'));
       const dirs = spread(oldChars);
       oldChars.forEach(function (c, i) {
@@ -1290,6 +1332,19 @@ renderSeats();   // 初始渲染十剑占位
           [{ opacity: 1, filter: 'blur(0px)',    transform: 'translate(0,0) scale(1)' },
            { opacity: 0, filter: 'blur(3.4px)',  transform: 'translate(' + dx + 'px,' + (-7 - edge * 4) + 'px) scale(' + (1 + edge * 0.05) + ')' }],
           { duration: 1150 + edge * 220, delay: (1 - edge) * 150 + i * 22, easing: CREAM_OUT, fill: 'forwards' }
+        );
+      });
+
+      // 同时刻：白光逐字亮起再熄灭，像墨迹将散前被光透了一下
+      flashChars.forEach(function (c, i) {
+        const t = dirs[i] || 0;
+        const edge = Math.abs(t);
+        c.animate(
+          [{ opacity: 0,    filter: 'blur(0px)' },
+           { opacity: 1,    filter: 'blur(0px)', offset: .24 },
+           { opacity: .62,  filter: 'blur(1.1px)', offset: .55 },
+           { opacity: 0,    filter: 'blur(3px)' }],
+          { duration: 1250 + edge * 220, delay: (1 - edge) * 150 + i * 22, easing: 'cubic-bezier(.3,0,.3,1)', fill: 'forwards' }
         );
       });
 
