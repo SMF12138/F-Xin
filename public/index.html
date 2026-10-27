@@ -373,31 +373,52 @@ footer {
   text-align: center;
   position: relative;
   white-space: nowrap;
-  /* 底图宽 8 倍 = 8 个标题宽。彩虹只占其中的 2.1%（≈ 字宽的 1/6，约一字多），
-     即 800% × 2.1% ≈ 17% 的字行宽 —— 一条约一字宽的窄光带。
-     其余全是宣纸白，整张底图在笔画内左移，光带就自左向右滑过 */
-  background-image: linear-gradient(90deg,
-    #ece5d2 0%, #ece5d2 48.95%,
-    #ffe3d4 49.10%,
-    #ff5030 49.26%, #ff9a2e 49.50%, #ffe14d 49.74%,
-    #57e07a 49.98%, #38e2dd 50.22%, #5a93ff 50.46%,
-    #b767ff 50.70%, #ff5fbe 50.90%,
-    #f6ddff 51.05%,
-    #ece5d2 51.20%, #ece5d2 100%);
-  background-size: 800% 100%;
-  background-position: 58% 0;
-  background-repeat: no-repeat;
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent; color: transparent;
+  color: #ece5d2;                 /* 底字：全程宣纸白，无色 */
   filter: drop-shadow(0 1px 0 rgba(0,0,0,0.72)) drop-shadow(0 3px 10px rgba(0,0,0,0.55));
-  animation:
-    titleIn 1.1s .12s cubic-bezier(.22,1,.36,1) both,
-    bandSlide 7.2s linear 1.8s infinite;
+  animation: titleIn 1.1s .12s cubic-bezier(.22,1,.36,1) both;
 }
-@keyframes bandSlide {
-  0%   { background-position: 58% 0; }
-  32%  { background-position: 42% 0; }
-  100% { background-position: 42% 0; }
+/* 彩色层：七个字各一色（赤橙黄绿青蓝紫）。
+   整层被一条斜光带遮罩抠出来：光带自左向右移动，走到哪个字，
+   那个字才亮出它自己那一个颜色，走后立刻回白。 */
+.login-title .tcol {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  font: inherit; letter-spacing: inherit; padding-left: inherit;
+  line-height: inherit; text-align: center; white-space: nowrap;
+  display: block;
+  -webkit-mask-image: linear-gradient(136deg,
+    rgba(0,0,0,0) 47.30%,
+    rgba(0,0,0,.55) 47.70%,
+    #000 48.15%, #000 51.85%,
+    rgba(0,0,0,.55) 52.30%,
+    rgba(0,0,0,0) 52.70%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(136deg,
+    rgba(0,0,0,0) 47.30%,
+    rgba(0,0,0,.55) 47.70%,
+    #000 48.15%, #000 51.85%,
+    rgba(0,0,0,.55) 52.30%,
+    rgba(0,0,0,0) 52.70%, rgba(0,0,0,0) 100%);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 88% 0; mask-position: 88% 0;
+  animation: colorSweep 8.4s linear 1.7s infinite;
+}
+.login-title .tcol i {
+  font-style: normal; display: inline-block;
+  filter: drop-shadow(0 0 7px rgba(255,255,255,.20));
+}
+.login-title .tcol i:nth-child(1) { color: #ef4a2e; }
+.login-title .tcol i:nth-child(2) { color: #f5891f; }
+.login-title .tcol i:nth-child(3) { color: #e8cd2b; }
+.login-title .tcol i:nth-child(4) { color: #45c65a; }
+.login-title .tcol i:nth-child(5) { color: #1fbfba; }
+.login-title .tcol i:nth-child(6) { color: #3a74d8; }
+.login-title .tcol i:nth-child(7) { color: #9450d8; }
+/* 约 3s 走完整行（35%），其余时间整行停在纯白 */
+@keyframes colorSweep {
+  0%   { -webkit-mask-position: 88% 0; mask-position: 88% 0; }
+  34%  { -webkit-mask-position: 12% 0; mask-position: 12% 0; }
+  100% { -webkit-mask-position: 12% 0; mask-position: 12% 0; }
 }
 @keyframes titleIn {
   from { opacity: 0; transform: translateY(12px); filter: blur(7px); }
@@ -663,7 +684,7 @@ footer {
       <div class="frame2"></div>
       <div class="glyph">信</div>
     </div>
-    <div class="login-title" aria-label="天地一家奶龙盟">天地一家奶龙盟</div>
+    <div class="login-title" aria-label="天地一家奶龙盟">天地一家奶龙盟<span class="tcol" aria-hidden="true"><i>天</i><i>地</i><i>一</i><i>家</i><i>奶</i><i>龙</i><i>盟</i></span></div>
     <div class="login-seal-sub">风信子屋<span style="display:inline-block;width:2.2em"></span>恭迎入席</div>
     <div class="login-divider"></div>
     <div class="login-card" id="loginCard">
