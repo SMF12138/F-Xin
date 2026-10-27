@@ -387,21 +387,25 @@ footer {
   line-height: inherit; text-align: center; white-space: nowrap;
   display: block;
   -webkit-mask-image: linear-gradient(122deg,
-    rgba(0,0,0,0) 48.55%,
-    rgba(0,0,0,.20) 49.00%,
-    rgba(0,0,0,.75) 49.30%,
+    rgba(0,0,0,0) 41.20%,
+    rgba(0,0,0,.10) 44.50%,
+    rgba(0,0,0,.24) 46.80%,
+    rgba(0,0,0,.44) 48.40%,
+    rgba(0,0,0,.70) 49.10%,
     #000 49.55%, #000 50.45%,
-    rgba(0,0,0,.75) 50.70%,
-    rgba(0,0,0,.20) 51.00%,
-    rgba(0,0,0,0) 51.45%, rgba(0,0,0,0) 100%);
+    rgba(0,0,0,.70) 50.90%,
+    rgba(0,0,0,.24) 51.70%,
+    rgba(0,0,0,0) 52.40%, rgba(0,0,0,0) 100%);
   mask-image: linear-gradient(122deg,
-    rgba(0,0,0,0) 48.55%,
-    rgba(0,0,0,.20) 49.00%,
-    rgba(0,0,0,.75) 49.30%,
+    rgba(0,0,0,0) 41.20%,
+    rgba(0,0,0,.10) 44.50%,
+    rgba(0,0,0,.24) 46.80%,
+    rgba(0,0,0,.44) 48.40%,
+    rgba(0,0,0,.70) 49.10%,
     #000 49.55%, #000 50.45%,
-    rgba(0,0,0,.75) 50.70%,
-    rgba(0,0,0,.20) 51.00%,
-    rgba(0,0,0,0) 51.45%, rgba(0,0,0,0) 100%);
+    rgba(0,0,0,.70) 50.90%,
+    rgba(0,0,0,.24) 51.70%,
+    rgba(0,0,0,0) 52.40%, rgba(0,0,0,0) 100%);
   -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   -webkit-mask-position: 92% 0; mask-position: 92% 0;
@@ -412,15 +416,17 @@ footer {
 .login-title .tcol i {
   font-style: normal; display: inline-block;
   /* 每个字自己带银边，彩光一过就是「银包彩」的质感 */
-  filter: drop-shadow(0 0 6px rgba(255,252,242,.35));
+  filter: saturate(1.45) brightness(1.14)
+          drop-shadow(0 0 4px rgba(255,255,255,.45))
+          drop-shadow(0 0 10px rgba(255,252,242,.30));
 }
-.login-title .tcol i:nth-child(1) { color: #f0553a; }
-.login-title .tcol i:nth-child(2) { color: #f78f2c; }
-.login-title .tcol i:nth-child(3) { color: #f0d63f; }
-.login-title .tcol i:nth-child(4) { color: #56d06b; }
-.login-title .tcol i:nth-child(5) { color: #3fcfc9; }
-.login-title .tcol i:nth-child(6) { color: #5a8ce8; }
-.login-title .tcol i:nth-child(7) { color: #a566e8; }
+.login-title .tcol i:nth-child(1) { color: #ff5b3c; }
+.login-title .tcol i:nth-child(2) { color: #ff9a2f; }
+.login-title .tcol i:nth-child(3) { color: #ffe14a; }
+.login-title .tcol i:nth-child(4) { color: #5fe078; }
+.login-title .tcol i:nth-child(5) { color: #3fe0d9; }
+.login-title .tcol i:nth-child(6) { color: #5f97ff; }
+.login-title .tcol i:nth-child(7) { color: #b06cff; }
 
 /* 银光层：比彩光更宽的一层月白辉光，同一时间扫过，两条叠着走 */
 .login-title .tsilver {
@@ -436,7 +442,7 @@ footer {
     rgba(0,0,0,0) 47.3%,
     rgba(0,0,0,.10) 48.2%,
     rgba(0,0,0,.42) 49.0%,
-    rgba(0,0,0,.80) 49.7%, rgba(0,0,0,.80) 50.3%,
+    rgba(0,0,0,.58) 49.7%, rgba(0,0,0,.58) 50.3%,
     rgba(0,0,0,.42) 51.0%,
     rgba(0,0,0,.10) 51.8%,
     rgba(0,0,0,0) 52.7%, rgba(0,0,0,0) 100%);
@@ -444,7 +450,7 @@ footer {
     rgba(0,0,0,0) 47.3%,
     rgba(0,0,0,.10) 48.2%,
     rgba(0,0,0,.42) 49.0%,
-    rgba(0,0,0,.92) 49.5%, rgba(0,0,0,.92) 50.5%,
+    rgba(0,0,0,.62) 49.6%, rgba(0,0,0,.62) 50.4%,
     rgba(0,0,0,.42) 51.0%,
     rgba(0,0,0,.10) 51.8%,
     rgba(0,0,0,0) 52.7%, rgba(0,0,0,0) 100%);
@@ -458,18 +464,23 @@ footer {
 
 /* 走完这一趟只占 8.5%，约 1.1 秒；其余时间整行纯白 */
 @keyframes colorFlash {
-  0%    { opacity: 0; -webkit-mask-position: 92% 0; mask-position: 92% 0; }
-  2%    { opacity: 1; -webkit-mask-position: 89% 0; mask-position: 89% 0; }
-  22%   { opacity: 1; -webkit-mask-position: 11% 0; mask-position: 11% 0; }
-  24%   { opacity: 0; -webkit-mask-position: 9% 0;  mask-position: 9% 0; }
-  100%  { opacity: 0; -webkit-mask-position: 9% 0;  mask-position: 9% 0; }
+  0%    { opacity: 0;  -webkit-mask-position: 92% 0; mask-position: 92% 0; }
+  2%    { opacity: 1;  -webkit-mask-position: 90% 0; mask-position: 90% 0; }
+  18%   { opacity: 1;  -webkit-mask-position: 16% 0; mask-position: 16% 0; }
+  26%   { opacity: .82;-webkit-mask-position: 2% 0;  mask-position: 2% 0; }
+  33%   { opacity: .46;-webkit-mask-position: -4% 0; mask-position: -4% 0; }
+  40%   { opacity: .16;-webkit-mask-position: -9% 0; mask-position: -9% 0; }
+  47%   { opacity: 0;  -webkit-mask-position: -14% 0;mask-position: -14% 0; }
+  100%  { opacity: 0;  -webkit-mask-position: -14% 0;mask-position: -14% 0; }
 }
 @keyframes silverFlash {
   0%    { opacity: 0; -webkit-mask-position: 92% 0; mask-position: 92% 0; }
-  2%    { opacity: .98; -webkit-mask-position: 89% 0; mask-position: 89% 0; }
-  22%   { opacity: .98; -webkit-mask-position: 11% 0; mask-position: 11% 0; }
-  24%   { opacity: 0; -webkit-mask-position: 9% 0;  mask-position: 9% 0; }
-  100%  { opacity: 0; -webkit-mask-position: 9% 0;  mask-position: 9% 0; }
+  2%    { opacity: .98; -webkit-mask-position: 90% 0; mask-position: 90% 0; }
+  18%   { opacity: .98; -webkit-mask-position: 16% 0; mask-position: 16% 0; }
+  24%   { opacity: .60; -webkit-mask-position: 3% 0; mask-position: 3% 0; }
+  30%   { opacity: .22; -webkit-mask-position: -5% 0; mask-position: -5% 0; }
+  36%   { opacity: 0; -webkit-mask-position: -12% 0; mask-position: -12% 0; }
+  100%  { opacity: 0; -webkit-mask-position: -12% 0; mask-position: -12% 0; }
 }
 @keyframes titleIn {
   from { opacity: 0; transform: translateY(12px); filter: blur(7px); }
