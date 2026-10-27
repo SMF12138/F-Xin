@@ -401,7 +401,8 @@ footer {
   -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   -webkit-mask-position: 88% 0; mask-position: 88% 0;
-  animation: colorSweep 8.4s linear 1.7s infinite;
+  /* forwards：扫完就锁死在「光带已完全出界」，不会留一抹色卡在字里 */
+  animation: colorSweep 8.4s linear 1.7s 1 forwards;
 }
 .login-title .tcol i {
   font-style: normal; display: inline-block;
@@ -420,6 +421,7 @@ footer {
   34%  { -webkit-mask-position: 12% 0; mask-position: 12% 0; }
   100% { -webkit-mask-position: 12% 0; mask-position: 12% 0; }
 }
+
 @keyframes titleIn {
   from { opacity: 0; transform: translateY(12px); filter: blur(7px); }
   to   { opacity: 1; transform: none; filter: blur(0); }
@@ -1380,6 +1382,20 @@ renderSeats();   // 初始渲染十剑占位
     melt(subEl, t.sub, t.tone, 0);
     melt(footEl, t.foot, i === 0 ? 'plain' : t.tone, 190);
   }, 11000);
+})();
+
+/* 标题斜光条：扫一次 → 完事停在界外 → 隔 6 秒再来一次 */
+(function(){
+  var col = document.querySelector('.login-title .tcol');
+  if(!col) return;
+  function resweep(){
+    col.style.animation = 'none';
+    // 强制重排，让 animation 重新从 0% 开始
+    void col.offsetWidth;
+    col.style.animation = 'colorSweep 8.4s linear 1.7s 1 forwards';
+  }
+  col.style.animation = 'colorSweep 8.4s linear 1.7s 1 forwards';
+  setInterval(resweep, 15000);
 })();
 </script>
 </body>
