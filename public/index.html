@@ -562,7 +562,16 @@ footer {
 }
 .field input:focus { border-bottom-color: rgba(194,69,58,0.85); }
 .field:focus-within .icon { color: var(--cinnabar-bright); }
-.field input::placeholder { color: rgba(255,245,220,0.32); letter-spacing: 3px; font-family: var(--serif); }
+.field input::placeholder { color: rgba(255,245,220,0.32); letter-spacing: 3px; font-family: var(--serif); transition: color .45s ease, text-shadow .45s ease; }
+/* 聚焦/已填入时，占位联语高亮成暖金，并带一点柔光 */
+.field:focus-within input::placeholder {
+  color: rgba(238,214,158,0.92);
+  text-shadow: 0 0 10px rgba(226,196,132,0.45), 0 0 22px rgba(226,196,132,0.20);
+}
+.field input:not(:placeholder-shown)::placeholder {
+  color: rgba(238,214,158,0.55);
+  text-shadow: 0 0 8px rgba(226,196,132,0.22);
+}
 .field { overflow: hidden; }
   .field::after {
   content: ""; position: absolute; left: 34px; right: 0; bottom: 0; height: 1px;
