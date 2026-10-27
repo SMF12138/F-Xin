@@ -412,9 +412,7 @@ footer {
 .login-title .tcol i {
   font-style: normal; display: inline-block;
   /* 每个字自己带银边，彩光一过就是「银包彩」的质感 */
-  filter: drop-shadow(0 0 2px rgba(255,255,255,.85))
-          drop-shadow(0 0 7px rgba(255,252,242,.55))
-          drop-shadow(0 0 16px rgba(255,240,210,.28));
+  filter: drop-shadow(0 0 6px rgba(255,252,242,.35));
 }
 .login-title .tcol i:nth-child(1) { color: #f0553a; }
 .login-title .tcol i:nth-child(2) { color: #f78f2c; }
@@ -426,18 +424,34 @@ footer {
 
 /* 银光层：比彩光更宽的一层月白辉光，同一时间扫过，两条叠着走 */
 .login-title .tsilver {
-  position: absolute; inset: -30% 0;
+  position: absolute; inset: 0;
   pointer-events: none;
-  background: linear-gradient(122deg,
-    rgba(255,255,255,0) 47.6%,
-    rgba(255,255,255,.08) 48.6%,
-    rgba(255,255,255,.38) 49.5%,
-    rgba(255,254,250,.72) 50.0%,
-    rgba(255,255,255,.38) 50.5%,
-    rgba(255,255,255,.08) 51.4%,
-    rgba(255,255,255,0) 52.4%);
-  mix-blend-mode: screen;
-  filter: blur(2.5px);
+  font: inherit; letter-spacing: inherit; padding-left: inherit;
+  line-height: inherit; text-align: center; white-space: nowrap;
+  display: block;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  /* 银光带比彩光带略宽（同一角度），叠在上面 => 彩光被银光包住 */
+  -webkit-mask-image: linear-gradient(122deg,
+    rgba(0,0,0,0) 47.3%,
+    rgba(0,0,0,.10) 48.2%,
+    rgba(0,0,0,.42) 49.0%,
+    rgba(0,0,0,.80) 49.7%, rgba(0,0,0,.80) 50.3%,
+    rgba(0,0,0,.42) 51.0%,
+    rgba(0,0,0,.10) 51.8%,
+    rgba(0,0,0,0) 52.7%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(122deg,
+    rgba(0,0,0,0) 47.3%,
+    rgba(0,0,0,.10) 48.2%,
+    rgba(0,0,0,.42) 49.0%,
+    rgba(0,0,0,.92) 49.5%, rgba(0,0,0,.92) 50.5%,
+    rgba(0,0,0,.42) 51.0%,
+    rgba(0,0,0,.10) 51.8%,
+    rgba(0,0,0,0) 52.7%, rgba(0,0,0,0) 100%);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 92% 0; mask-position: 92% 0;
+  text-shadow: 0 0 3px rgba(255,255,255,1), 0 0 9px rgba(255,253,246,.95), 0 0 20px rgba(255,246,222,.7), 0 0 34px rgba(255,240,206,.35);
   opacity: 0;
   animation: silverFlash 13s linear 1.6s 1 forwards;
 }
@@ -445,17 +459,17 @@ footer {
 /* 走完这一趟只占 8.5%，约 1.1 秒；其余时间整行纯白 */
 @keyframes colorFlash {
   0%    { opacity: 0; -webkit-mask-position: 92% 0; mask-position: 92% 0; }
-  1%    { opacity: 1; -webkit-mask-position: 90% 0; mask-position: 90% 0; }
-  8%    { opacity: 1; -webkit-mask-position: 10% 0; mask-position: 10% 0; }
-  9%    { opacity: 0; -webkit-mask-position: 8% 0;  mask-position: 8% 0; }
-  100%  { opacity: 0; -webkit-mask-position: 8% 0;  mask-position: 8% 0; }
+  2%    { opacity: 1; -webkit-mask-position: 89% 0; mask-position: 89% 0; }
+  22%   { opacity: 1; -webkit-mask-position: 11% 0; mask-position: 11% 0; }
+  24%   { opacity: 0; -webkit-mask-position: 9% 0;  mask-position: 9% 0; }
+  100%  { opacity: 0; -webkit-mask-position: 9% 0;  mask-position: 9% 0; }
 }
 @keyframes silverFlash {
-  0%    { opacity: 0; transform: translateX(112%); }
-  1.4%  { opacity: .95; transform: translateX(96%); }
-  7.6%  { opacity: .95; transform: translateX(-30%); }
-  9%    { opacity: 0; transform: translateX(-38%); }
-  100%  { opacity: 0; transform: translateX(-38%); }
+  0%    { opacity: 0; -webkit-mask-position: 92% 0; mask-position: 92% 0; }
+  2%    { opacity: .98; -webkit-mask-position: 89% 0; mask-position: 89% 0; }
+  22%   { opacity: .98; -webkit-mask-position: 11% 0; mask-position: 11% 0; }
+  24%   { opacity: 0; -webkit-mask-position: 9% 0;  mask-position: 9% 0; }
+  100%  { opacity: 0; -webkit-mask-position: 9% 0;  mask-position: 9% 0; }
 }
 @keyframes titleIn {
   from { opacity: 0; transform: translateY(12px); filter: blur(7px); }
@@ -721,7 +735,7 @@ footer {
       <div class="frame2"></div>
       <div class="glyph">信</div>
     </div>
-    <div class="login-title" aria-label="天地一家奶龙盟">天地一家奶龙盟<span class="tcol" aria-hidden="true"><i>天</i><i>地</i><i>一</i><i>家</i><i>奶</i><i>龙</i><i>盟</i></span><span class="tsilver" aria-hidden="true"></span></div>
+    <div class="login-title" aria-label="天地一家奶龙盟">天地一家奶龙盟<span class="tcol" aria-hidden="true"><i>天</i><i>地</i><i>一</i><i>家</i><i>奶</i><i>龙</i><i>盟</i></span><span class="tsilver" aria-hidden="true">天地一家奶龙盟</span></div>
     <div class="login-seal-sub">风信子屋<span style="display:inline-block;width:2.2em"></span>恭迎入席</div>
     <div class="login-divider"></div>
     <div class="login-card" id="loginCard">
