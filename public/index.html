@@ -367,13 +367,58 @@ footer {
 /* ── 标题与副诗 ── */
 .login-title {
   font-family: var(--serif);
-  font-size: 27px; font-weight: 700; letter-spacing: 6px; padding-left: 6px;
-  background: linear-gradient(180deg, #f2eee2 20%, #c3bfb0 85%);
+  font-size: 27px; font-weight: 700;
+  text-align: center;
+  animation: stageIn 1s 0.12s cubic-bezier(0.22,1,0.36,1) both;
+  display: flex; justify-content: center; align-items: baseline;
+}
+.login-title .tt {
+  display: inline-block;
+  letter-spacing: 6px;
+  background-image: linear-gradient(180deg, #f2eee2 20%, #c3bfb0 85%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
   filter: drop-shadow(0 1px 0 rgba(0,0,0,0.7)) drop-shadow(0 4px 14px rgba(0,0,0,0.5));
-  text-align: center;
-  animation: stageIn 1s 0.12s cubic-bezier(0.22,1,0.36,1) both;
+  background-size: 100% 100%;
+  animation: titleRise .9s cubic-bezier(.22,1,.36,1) both, ttGlow 4.6s ease-in-out infinite;
+}
+.login-title .tt:last-child { letter-spacing: 0; }
+/* 赤橙黄绿青蓝紫，每字定色；闪光为同色高光扫过 + 呼吸亮度 */
+.login-title .tt.o0 { --hue: 6;   --dl: 0s;    }
+.login-title .tt.o1 { --hue: 26;  --dl: .30s;  }
+.login-title .tt.o2 { --hue: 48;  --dl: .60s;  }
+.login-title .tt.o3 { --hue: 110; --dl: .90s;  }
+.login-title .tt.o4 { --hue: 175; --dl: 1.20s; }
+.login-title .tt.o5 { --hue: 218; --dl: 1.50s; }
+.login-title .tt.o6 { --hue: 282; --dl: 1.80s; }
+@keyframes titleRise {
+  from { opacity: 0; transform: translateY(14px) scale(.94); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes ttGlow {
+  0%, 62%, 100% {
+    background-image: linear-gradient(180deg, #efe9d9 12%, #c8c3b4 88%);
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.7)) drop-shadow(0 4px 14px rgba(0,0,0,.5));
+  }
+  74%, 86% {
+    background-image: linear-gradient(
+      160deg,
+      hsl(var(--hue) 92% 74%) 0%,
+      hsl(var(--hue) 96% 62%) 34%,
+      #fff8ea 50%,
+      hsl(var(--hue) 96% 62%) 66%,
+      hsl(var(--hue) 92% 74%) 100%);
+    background-size: 260% 100%;
+    animation-name: ttGlow, ttSweep;
+    filter:
+      drop-shadow(0 1px 0 rgba(0,0,0,.7))
+      drop-shadow(0 0 6px hsla(var(--hue), 96%, 62%, .55))
+      drop-shadow(0 0 18px hsla(var(--hue), 92%, 58%, .3));
+  }
+}
+@keyframes ttSweep {
+  0%   { background-position: 140% 0; }
+  100% { background-position: -40% 0; }
 }
 .login-seal-sub {
   margin-top: 10px;
@@ -565,7 +610,8 @@ footer {
   .bubble { width: 24em; font-size: 13px; }
   .seat-chip { font-size: 11px; padding: 4px 9px; letter-spacing: 1px; }
   .login-card { padding: 26px 20px 22px; border-radius: 4px; }
-  .login-title { font-size: 20px; letter-spacing: 4px; padding-left: 4px; }
+  .login-title { font-size: 20px; }
+  .login-title .tt { letter-spacing: 4px; }
   .login-poem { font-size: 11px; letter-spacing: 3px; }
   .sigil-seal { width: 88px; height: 88px; }
   .sigil-seal .glyph { font-size: 44px; }
@@ -613,7 +659,7 @@ footer {
       <div class="frame2"></div>
       <div class="glyph">信</div>
     </div>
-    <div class="login-title">天地一家奶龙盟</div>
+    <div class="login-title" aria-label="天地一家奶龙盟"><span class="tt o0">天</span><span class="tt o1">地</span><span class="tt o2">一</span><span class="tt o3">家</span><span class="tt o4">奶</span><span class="tt o5">龙</span><span class="tt o6">盟</span></div>
     <div class="login-seal-sub">风信子屋<span style="display:inline-block;width:2.2em"></span>恭迎入席</div>
     <div class="login-divider"></div>
     <div class="login-card" id="loginCard">
